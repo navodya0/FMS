@@ -26,7 +26,7 @@
                     <div class="card text-center shadow-md  h-100" style="border: 2px solid rgb(3, 49, 84)">
                         <div class="card-body d-flex flex-column justify-content-center">
                             <h5 class="fw-bold mb-2">
-                                Barrel {{ $barrel->barrel_number }} :
+                                Container {{ $barrel->barrel_number }} :
                                 <span class="text-muted" style="font-size: 14px;">{{ $barrel->capacity }}L</span>
                             </h5>
 
@@ -106,7 +106,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>Barrel</th>
+                                    <th>Container</th>
                                     <th>Vehicle</th>
                                     <th>Amount</th>
                                     <th>Refilled Date</th>
@@ -119,7 +119,7 @@
                                 @forelse($refilledLogs as $key => $log)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td>Barrel {{ $log->barrel->barrel_number ?? '-' }}</td>
+                                        <td>Container {{ $log->barrel->barrel_number ?? '-' }}</td>
                                         <td>{{ $log->vehicle->reg_no ?? ('Vehicle #'.($log->vehicle->id ?? '')) }}</td>
                                         <td>{{ $log->fuel_refilled_amount }} L</td>
                                         <td>{{ $log->fuel_refilled_date ? \Carbon\Carbon::parse($log->fuel_refilled_date)->format('Y-m-d H:i') : '-' }}</td>
@@ -142,7 +142,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>Barrel</th>
+                                    <th>Container</th>
                                     <th>Vehicle</th>
                                     <th>Amount</th>
                                     <th>Taken Date</th>
@@ -155,7 +155,7 @@
                                 @forelse($takenLogs as $key => $log)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td>Barrel {{ $log->barrel->barrel_number ?? '-' }}</td>
+                                        <td>Container {{ $log->barrel->barrel_number ?? '-' }}</td>
                                         <td>{{ $log->vehicle->reg_no ?? ('Vehicle #'.($log->vehicle->id ?? '')) }}</td>
                                         <td>{{ $log->fuel_taken_count }} L</td>
                                         <td>{{ $log->fuel_taken_date ? \Carbon\Carbon::parse($log->fuel_taken_date)->format('Y-m-d H:i') : '-' }}</td>
@@ -234,7 +234,7 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Barrel</label>
+                            <label class="form-label">Container</label>
                             <input type="text" class="form-control" id="modal_barrel_name" readonly>
                         </div>
 
@@ -307,7 +307,7 @@
     function openFuelModal(actionType, barrelId, barrelNumber, barrelCapacity) {
         document.getElementById('modal_barrel_id').value = barrelId;
         document.getElementById('modal_action_type').value = actionType;
-        document.getElementById('modal_barrel_name').value = 'Barrel ' + barrelNumber + ' (' + barrelCapacity + 'L)';
+        document.getElementById('modal_barrel_name').value = 'Container' + barrelNumber + ' (' + barrelCapacity + 'L)';
         document.getElementById('modal_barrel_capacity').value = barrelCapacity;
 
         const amountInput = document.getElementById('amount');
