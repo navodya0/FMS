@@ -218,8 +218,6 @@ class TransportServiceController extends Controller
         return back()->with('success', 'Transport service deleted + synced to Admin-ERP.');
     }
 
-
-
     public function validateVehicleForTransport(Request $request)
     {
         $data = $request->validate([

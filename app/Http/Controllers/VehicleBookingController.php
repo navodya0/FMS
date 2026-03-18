@@ -68,7 +68,6 @@ class VehicleBookingController extends Controller
         $transportServices = TransportService::with(['vehicle','chauffer'])
             ->latest()
             ->get();
-
             
         $chauffers = [];
 
