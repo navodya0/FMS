@@ -4,20 +4,27 @@
 <div class="container">
     <div class="card shadow-sm border-0 p-4">
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+       <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    
             <h4 class="fw-bold mb-0">Fuel Barrels</h4>
 
-            <form action="{{ route('barrels.store') }}" method="POST" class="d-flex align-items-center gap-2">
-                @csrf
-                <select name="capacity" class="form-select" required>
-                    <option value="20">20L</option>
-                    <option value="25">25L</option>
-                </select>
+            <div class="d-flex align-items-center gap-3">
+                <h5 class="fw-semibold mb-0">
+                    Remaining Fuel : <span class="text-success fw-semibold">{{ $remainingFuel }} L</span>
+                </h5>
 
-                <button type="submit" class="btn btn-primary">
-                    Add
-                </button>
-            </form>
+                <form action="{{ route('barrels.store') }}" method="POST" class="d-flex align-items-center gap-2">
+                    @csrf
+                    <select name="capacity" class="form-select" required>
+                        <option value="20">20L</option>
+                        <option value="25">25L</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">
+                        Add
+                    </button>
+                </form>
+            </div>
         </div>
 
         <div class="row" id="barrel-container">

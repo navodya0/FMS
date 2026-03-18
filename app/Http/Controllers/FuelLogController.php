@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\FuelLog;
 use App\Models\Vehicle;
 use App\Models\Barrel;
+use Illuminate\Support\Facades\DB;
 
 class FuelLogController extends Controller
 {
@@ -15,7 +16,6 @@ class FuelLogController extends Controller
         $barrels = Barrel::with('fuelLogs')->orderBy('barrel_number')->get();
         $vehicles = Vehicle::where('status', 'active')->orderBy('id')->get();
 
-        // calculate balance per barrel
         foreach ($barrels as $barrel) {
             $refilled = $barrel->fuelLogs->sum('fuel_refilled_amount');
             $taken = $barrel->fuelLogs->sum('fuel_taken_count');
@@ -25,7 +25,12 @@ class FuelLogController extends Controller
 
         $fuelLogs = FuelLog::with(['vehicle','barrel'])->latest()->get();
 
-        return view('fuel-logs.index', compact('barrels', 'vehicles', 'fuelLogs'));
+        $totalRefilled = DB::table('fuel_logs')->sum('fuel_refilled_amount');
+        $totalTaken = DB::table('fuel_logs')->sum('fuel_taken_count');
+
+        $remainingFuel = $totalRefilled - $totalTaken;
+
+        return view('fuel-logs.index', compact('barrels', 'vehicles', 'fuelLogs','remainingFuel'));
     }
 
     public function store(Request $request)
