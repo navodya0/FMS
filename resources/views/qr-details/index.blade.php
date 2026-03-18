@@ -28,6 +28,7 @@
                     <th>#</th>
                     <th>Registration No</th>
                     <th>Company</th>
+                    <th>Ownership Type</th>
                     <th>Uploaded QR</th>
                     @if($canEdit)
                         <th>Upload QR</th>
@@ -40,6 +41,7 @@
                     <td>{{ $key + 1 }}</td>
                     <td>{{ $vehicle->reg_no }}</td>
                     <td>{{ $vehicle->company->name ?? 'N/A' }}</td>                    
+                    <td>{{ $vehicle->ownershipType->ownership_name ?? 'N/A' }}</td>                    
                     <td>
                         @if($vehicle->qrImages->count())
                             @foreach($vehicle->qrImages as $qr)
