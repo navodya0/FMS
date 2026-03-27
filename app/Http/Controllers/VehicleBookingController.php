@@ -68,16 +68,25 @@ class VehicleBookingController extends Controller
         $transportServices = TransportService::with(['vehicle','chauffer'])
             ->latest()
             ->get();
-            
+        
         $chauffers = [];
 
         try {
-            $response = Http::timeout(10)->get('http://127.0.0.1:9000/api/chauffers');
+            $response = Http::timeout(15)
+                ->acceptJson()
+                ->get('https://exploresuite.lk/api/chauffers');
+
+            Log::info('Chauffers API status', ['status' => $response->status()]);
+            Log::info('Chauffers API response', ['body' => $response->body()]);
 
             if ($response->successful()) {
-                $chauffers = $response->json();
+                $chauffers = $response->json('data') ?? $response->json() ?? [];
             }
         } catch (\Throwable $e) {
+            Log::error('Failed to load chauffers', [
+                'message' => $e->getMessage(),
+            ]);
+
             $chauffers = [];
         }
 

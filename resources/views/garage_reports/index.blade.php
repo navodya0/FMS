@@ -124,12 +124,11 @@
                     <h4 class="fw-bold mb-0">Fleet Manager Decisions (Inbuild Only)</h4>
                 </div>
                 <div class="table-responsive card-body">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered" id="fleetManagerDecision">
                         <thead>
                             <tr>
                                 <th>Job Code</th>
                                 <th>Vehicle</th>
-                                <th>Issues</th>
                                 <th>Decision</th>
                                 <th>Actions</th>
                             </tr>
@@ -146,18 +145,6 @@
                                 <tr>
                                     <td>{{ $inspection->job_code }}</td>
                                     <td>{{ $inspection->vehicle->reg_no }}</td>
-                                    <td>
-                                        @foreach($garageReport->inbuildIssues as $inbuild)
-                                            <div class="mb-1">
-                                                @if($inbuild->issue_id)
-                                                    <span class="badge bg-info">{{ \App\Models\Issue::find($inbuild->issue_id)->name }}</span>
-                                                @endif
-                                                @if($inbuild->fault_id)
-                                                    <span class="badge bg-secondary">{{ \App\Models\Fault::find($inbuild->fault_id)->name }}</span>
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </td>
                                     <td>
                                         <span class="badge bg-success">Inbuild</span>
                                     </td>
@@ -496,6 +483,13 @@
         $('#completedReportsTable').DataTable({
             pageLength: 10,
             ordering: true,
+            searching: true,
+            lengthChange: true
+        });
+
+        $('#fleetManagerDecision').DataTable({
+            pageLength: 10,
+            ordering: false,
             searching: true,
             lengthChange: true
         });

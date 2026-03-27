@@ -104,6 +104,7 @@ class TransportServiceController extends Controller
             'dropoff_location' => $ts->dropoff_location,
             'passenger_count' => $ts->passenger_count,
             'note' => $ts->note,
+            'status' => 'ASSIGNED',
         ];
 
         try {
@@ -222,16 +223,12 @@ class TransportServiceController extends Controller
     {
         $data = $request->validate([
             'vehicle_no' => 'required|string|max:50',
-            'vehicle_type_id' => 'required|exists:vehicle_types,id',
-            'assigned_start_at' => 'required|date',
+            'vehicle_type_id' => 'nullable|exists:vehicle_types,id',
+            'vehicle_type_name' => 'nullable|string|max:100',
+            'assigned_start_at' => 'nullable|date',
             'assigned_end_at' => 'nullable|date|after_or_equal:assigned_start_at',
             'transport_service_id' => 'nullable|integer|exists:transport_services,id',
         ]);
-
-        $start = Carbon::parse($data['assigned_start_at']);
-        $end = !empty($data['assigned_end_at'])
-            ? Carbon::parse($data['assigned_end_at'])
-            : Carbon::parse($data['assigned_start_at']);
 
         $vehicle = Vehicle::with('vehicleType')
             ->where('reg_no', $data['vehicle_no'])
@@ -244,82 +241,71 @@ class TransportServiceController extends Controller
             ], 404);
         }
 
-        if ((int) $vehicle->vehicle_type_id !== (int) $data['vehicle_type_id']) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'Selected vehicle does not match the required vehicle type.',
-                'vehicle' => [
-                    'id' => $vehicle->id,
-                    'reg_no' => $vehicle->reg_no,
-                    'vehicle_type_id' => $vehicle->vehicle_type_id,
-                    'vehicle_type_name' => $vehicle->vehicleType?->type_name,
-                ],
-            ], 422);
+        $vehicleData = [
+            'id' => $vehicle->id,
+            'reg_no' => $vehicle->reg_no,
+            'vehicle_type_id' => $vehicle->vehicle_type_id,
+            'vehicle_type_name' => $vehicle->vehicleType?->type_name,
+        ];
+
+        $fail = fn($message, $status = 422) => response()->json([
+            'ok' => false,
+            'message' => $message,
+            'vehicle' => $vehicleData,
+        ], $status);
+
+        // If vehicle_type_id is missing but vehicle_type_name is given, resolve it
+        if (empty($data['vehicle_type_id']) && !empty($data['vehicle_type_name'])) {
+            $data['vehicle_type_id'] = \App\Models\VehicleType::where('type_name', $data['vehicle_type_name'])->value('id');
+        }
+
+        // Check vehicle no + vehicle type match
+        if (!empty($data['vehicle_type_id']) && (int) $vehicle->vehicle_type_id !== (int) $data['vehicle_type_id']) {
+            return $fail('Selected vehicle does not match the required vehicle type.');
         }
 
         if ($vehicle->status === 'disabled') {
-            return response()->json([
-                'ok' => false,
-                'message' => 'Vehicle is disabled.',
-            ], 422);
+            return $fail('Vehicle is disabled.');
         }
 
-        $isFrozen = $vehicle->freezes()
+        // If dates are not provided, only validate vehicle/type match and return success
+        if (empty($data['assigned_start_at'])) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Vehicle number and vehicle type match.',
+                'vehicle' => $vehicleData,
+            ]);
+        }
+
+        $start = Carbon::parse($data['assigned_start_at']);
+        $end = Carbon::parse($data['assigned_end_at'] ?? $data['assigned_start_at']);
+
+        if ($vehicle->freezes()
             ->where('start_date', '<=', $end)
-            ->where(function ($q) use ($start) {
-                $q->whereNull('end_date')
-                ->orWhere('end_date', '>=', $start);
-            })
-            ->exists();
-
-        if ($isFrozen) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'Vehicle is frozen for the selected period.',
-            ], 422);
+            ->where(fn($q) => $q->whereNull('end_date')->orWhere('end_date', '>=', $start))
+            ->exists()) {
+            return $fail('Vehicle is frozen for the selected period.');
         }
 
-        $rentalConflict = $vehicle->rentals()
+        if ($vehicle->rentals()
             ->whereDate('arrival_date', '<=', $end)
             ->whereDate('departure_date', '>=', $start)
-            ->exists();
-
-        if ($rentalConflict) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'Vehicle is not available for the selected period due to an existing rental.',
-            ], 422);
+            ->exists()) {
+            return $fail('Vehicle is not available for the selected period due to an existing rental.');
         }
 
-        $transportConflict = $vehicle->transportServices()
-            ->when(!empty($data['transport_service_id']), function ($q) use ($data) {
-                $q->where('id', '!=', $data['transport_service_id']);
-            })
-            ->where(function ($q) use ($start, $end) {
-                $q->where('assigned_start_at', '<=', $end)
-                ->where(function ($qq) use ($start) {
-                    $qq->whereNull('assigned_end_at')
-                        ->orWhere('assigned_end_at', '>=', $start);
-                });
-            })
-            ->exists();
-
-        if ($transportConflict) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'Vehicle is already assigned to another transport service in the selected period.',
-            ], 422);
+        if ($vehicle->transportServices()
+            ->when(!empty($data['transport_service_id']), fn($q) => $q->where('id', '!=', $data['transport_service_id']))
+            ->where('assigned_start_at', '<=', $end)
+            ->where(fn($q) => $q->whereNull('assigned_end_at')->orWhere('assigned_end_at', '>=', $start))
+            ->exists()) {
+            return $fail('Vehicle is already assigned to another transport service in the selected period.');
         }
 
         return response()->json([
             'ok' => true,
             'message' => 'Vehicle is valid and available.',
-            'vehicle' => [
-                'id' => $vehicle->id,
-                'reg_no' => $vehicle->reg_no,
-                'vehicle_type_id' => $vehicle->vehicle_type_id,
-                'vehicle_type_name' => $vehicle->vehicleType?->type_name,
-            ],
+            'vehicle' => $vehicleData,
         ]);
     }
 }

@@ -129,6 +129,7 @@
 
             <div class="modal-body">
                 <input type="hidden" name="type" id="ts_type">
+                <input type="hidden" name="status" value="ASSIGNED">
 
                 <div class="row g-3">
                     @php
@@ -231,6 +232,7 @@
 
             <div class="modal-body">
                 <input type="hidden" name="type" id="edit_type">
+                <input type="hidden" name="status" value="ASSIGNED">
 
                 <div class="row g-3">
                     <div class="col-md-6">

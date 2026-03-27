@@ -131,6 +131,8 @@ class GarageReportController extends Controller
             'issue_id.*' => 'exists:issues,id',
             'issue_action' => 'nullable|array',
             'issue_action.*' => 'nullable|in:repair,replace,top-up,refill',
+            'notes' => 'nullable|array',
+            'notes.*' => 'nullable|string|max:255',
             'hours' => 'nullable|numeric',
             'next_step' => 'required|in:send_to_repair,make_available',
 
@@ -141,6 +143,7 @@ class GarageReportController extends Controller
 
         $issueIds     = (array) $request->input('issue_id', []);
         $issueActions = (array) $request->input('issue_action', []);
+        $otherNotes   = (array) $request->input('notes', []);
         $hours        = $request->input('hours', null);
 
         $status = $request->next_step === 'send_to_repair'
@@ -161,34 +164,44 @@ class GarageReportController extends Controller
                 }
             }
 
-            return $urls; 
+            return $urls;
+        };
+
+        $buildNotes = function (int $issueId) use ($issueActions, $otherNotes) {
+            $issue = Issue::find($issueId);
+            $isOther = $issue && strtolower(trim($issue->name)) === 'other';
+
+            return $isOther
+                ? ($otherNotes[$issueId] ?? null)
+                : ($issueActions[$issueId] ?? null);
         };
 
         $firstIssueId = $issueIds[0] ?? null;
-        $firstAction  = $firstIssueId ? ($issueActions[$firstIssueId] ?? null) : null;
-        $firstImages  = $firstIssueId ? $storeIssueImages((int)$firstIssueId) : [];
+        $firstNotes   = $firstIssueId ? $buildNotes((int) $firstIssueId) : null;
+        $firstImages  = $firstIssueId ? $storeIssueImages((int) $firstIssueId) : [];
 
         $garageReport->update([
             'issue_id' => $firstIssueId,
             'hours'    => $hours,
-            'notes'    => $firstAction,
-            'images'   => !empty($firstImages) ? $firstImages : null, 
+            'notes'    => $firstNotes,
+            'images'   => !empty($firstImages) ? $firstImages : null,
             'status'   => $status,
         ]);
 
         $issueCount = count($issueIds);
+
         if ($issueCount > 1) {
             for ($i = 1; $i < $issueCount; $i++) {
-                $id = (int) $issueIds[$i];
-                $action = $issueActions[$id] ?? null;
+                $id     = (int) $issueIds[$i];
+                $notes  = $buildNotes($id);
                 $images = $storeIssueImages($id);
 
                 GarageReport::create([
                     'inspection_id' => $garageReport->inspection_id,
                     'issue_id'      => $id,
                     'hours'         => $hours,
-                    'notes'         => $action,
-                    'images'        => !empty($images) ? $images : null, 
+                    'notes'         => $notes,
+                    'images'        => !empty($images) ? $images : null,
                     'status'        => $status,
                 ]);
             }

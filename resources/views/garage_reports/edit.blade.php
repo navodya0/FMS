@@ -101,6 +101,10 @@
                                 <div class="card-body">
                                     <div class="row g-3">
                                         @foreach($category->issues as $issue)
+                                            @php
+                                                $isOther = strtolower(trim($issue->name)) === 'other';
+                                            @endphp
+
                                             <div class="col-md-4">
                                                 <div class="d-flex flex-column p-2 border rounded">
                                                     <div class="form-check mb-2">
@@ -109,23 +113,35 @@
                                                             {{ $issue->name }}
                                                         </label>
                                                     </div>
-                                                    <select name="issue_action[{{ $issue->id }}]"
-                                                            class="form-select form-select-sm issue-action-dropdown" disabled>
-                                                        <option value="">-- Action --</option>
-                                                        <option value="repair">Repair</option>
-                                                        <option value="replace">Replace</option>
-                                                        <option value="top-up">Top-up</option>
-                                                        <option value="refill">Refill</option>
-                                                    </select>
 
-<div class="mt-2 d-none issue-images-wrapper">
-    <input type="file"
-           name="images[{{ $issue->id }}][]"
-           class="form-control form-control-sm issue-images"
-           accept="image/*"
-           multiple>
-    <small class="text-muted">Upload images for this issue</small>
-</div>
+                                                    @if(!$isOther)
+                                                        <select name="issue_action[{{ $issue->id }}]"
+                                                                class="form-select form-select-sm issue-action-dropdown" disabled>
+                                                            <option value="">-- Action --</option>
+                                                            <option value="repair">Repair</option>
+                                                            <option value="replace">Replace</option>
+                                                            <option value="top-up">Top-up</option>
+                                                            <option value="refill">Refill</option>
+                                                        </select>
+                                                    @else
+                                                        <div class="issue-other-wrapper d-none">
+                                                            <textarea
+                                                                name="notes[{{ $issue->id }}]"
+                                                                class="form-control form-control-sm issue-other-input"
+                                                                rows="2"
+                                                                placeholder="Enter other issue"></textarea>
+                                                            <small class="text-muted">Describe the issue</small>
+                                                        </div>
+                                                    @endif
+
+                                                    <div class="mt-2 d-none issue-images-wrapper">
+                                                        <input type="file"
+                                                            name="images[{{ $issue->id }}][]"
+                                                            class="form-control form-control-sm issue-images"
+                                                            accept="image/*"
+                                                            multiple>
+                                                        <small class="text-muted">Upload images for this issue</small>
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endforeach
@@ -187,7 +203,13 @@
             let show = false;
 
             document.querySelectorAll('.issue-action-dropdown').forEach(select => {
-                if (select.value !== "") {
+                if (!select.disabled && select.value !== "") {
+                    show = true;
+                }
+            });
+
+            document.querySelectorAll('.issue-other-input').forEach(input => {
+                if (input.closest('.issue-other-wrapper') && !input.closest('.issue-other-wrapper').classList.contains('d-none') && input.value.trim() !== '') {
                     show = true;
                 }
             });
@@ -200,15 +222,24 @@
             }
         }
 
-      document.querySelectorAll('.issue-checkbox').forEach(checkbox => {
+        document.querySelectorAll('.issue-checkbox').forEach(checkbox => {
             const container = checkbox.closest('.d-flex.flex-column');
             const dropdown = container?.querySelector('.issue-action-dropdown');
+            const otherWrapper = container?.querySelector('.issue-other-wrapper');
+            const otherInput = container?.querySelector('.issue-other-input');
             const imagesWrapper = container?.querySelector('.issue-images-wrapper');
 
             const toggle = () => {
                 if (dropdown) {
                     dropdown.disabled = !checkbox.checked;
                     if (!checkbox.checked) dropdown.value = "";
+                }
+
+                if (otherWrapper) {
+                    otherWrapper.classList.toggle('d-none', !checkbox.checked);
+                    if (!checkbox.checked && otherInput) {
+                        otherInput.value = '';
+                    }
                 }
 
                 if (imagesWrapper) {
@@ -226,15 +257,16 @@
             checkbox.addEventListener('change', toggle);
         });
 
-        // Detect dropdown changes
         document.querySelectorAll('.issue-action-dropdown').forEach(select => {
             select.addEventListener('change', toggleHoursField);
         });
 
-        // Run once on page load
+        document.querySelectorAll('.issue-other-input').forEach(input => {
+            input.addEventListener('input', toggleHoursField);
+        });
+
         toggleHoursField();
 
-        // Image preview modal
         const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
         const modalImage = document.getElementById('modalImage');
 

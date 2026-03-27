@@ -8,6 +8,7 @@
     }
 </style>
 
+
 <div class="container-fluid py-2" style="background: #fff;">
     <h1 class="fw-bold mb-4 text-center">Reports Dashboard</h1>
 
@@ -181,7 +182,7 @@
                         <!-- Upload PDF -->
                         <div class="mb-3">
                             <label for="pdfFile" class="form-label fw-bold">Upload Report <span class="text-danger">*</span></label>
-                            <input type="file" class="form-control" id="pdfFile" name="pdfFile" required>
+                           <input type="file" class="form-control" id="pdfFile" name="pdfFile" accept="application/pdf" required>
                         </div>
 
                         <div class="mb-3">

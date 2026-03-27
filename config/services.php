@@ -39,4 +39,8 @@ return [
         'key' => env('ERP_SYNC_KEY'),
     ],
 
+    'rental_sync' => [
+        'secret' => env('SYNC_SECRET'),
+    ],
+
 ];
