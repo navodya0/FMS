@@ -182,7 +182,14 @@
                         <!-- Upload PDF -->
                         <div class="mb-3">
                             <label for="pdfFile" class="form-label fw-bold">Upload Report <span class="text-danger">*</span></label>
-                           <input type="file" class="form-control" id="pdfFile" name="pdfFile" accept="application/pdf" required>
+                            <input
+                                type="file"
+                                class="form-control"
+                                id="pdfFile"
+                                name="pdfFile"
+                                accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.webp"
+                                required
+                            >
                         </div>
 
                         <div class="mb-3">

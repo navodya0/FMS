@@ -65,7 +65,7 @@ class ReportsController extends Controller
             'effectiveWeek' => 'required|integer|between:1,5',
             'send_to_user_id' => 'required|exists:users,id',
             'remark' => 'nullable|string',
-            'pdfFile' => 'required|file|mimetypes:application/pdf|mimes:pdf|max:10240',
+            'pdfFile' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,csv,jpg,jpeg,png,gif,webp|max:20480',
         ]);
 
         $titleSlug = Str::slug($validated['reportName']); 
