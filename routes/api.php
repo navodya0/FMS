@@ -17,11 +17,6 @@ Route::post('/transport-services/validate-vehicle', [
 Route::get('/vehicle-details/{vehicleNumber}', [QRDetailsController::class, 'getVehicleDetails']);
 
 Route::post('/rental-sync', function (Request $request) {
-    Log::info('Rental Sync Route Hit', [
-        'headers' => $request->headers->all(),
-        'data' => $request->all(),
-    ]);
-
     $receivedSecret = $request->header('X-SYNC-SECRET');
     $expectedSecret = config('services.rental_sync.secret');
 
@@ -57,8 +52,6 @@ Route::post('/rental-sync', function (Request $request) {
             'vehicle_type' => 'nullable|string',
         ]);
 
-        Log::info('Rental Sync Validated Data', $data);
-
         $rental = Rental::create([
             'booking_number' => $data['booking_number'],
             'vehicle_id' => $data['vehicle_id'],
@@ -70,11 +63,6 @@ Route::post('/rental-sync', function (Request $request) {
             'passengers' => $data['passengers'],
             'status' => $data['status'],
             'created_by' => $data['created_by'],
-        ]);
-
-        Log::info('Rental Created', [
-            'rental_id' => $rental->id,
-            'booking_number' => $rental->booking_number,
         ]);
 
         return response()->json([
