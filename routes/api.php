@@ -35,48 +35,53 @@ Route::post('/rental-sync', function (Request $request) {
     try {
         $data = $request->validate([
             'booking_number' => 'required|string',
-            'vehicle_id' => 'required|integer',
-            'company_id' => 'required|integer',
-            'driver_name' => 'required|string',
-            'arrival_date' => 'required|date',
+            'vehicle_id'     => 'required|integer',
+            'company_id'     => 'required|integer',
+            'driver_name'    => 'required|string',
+            'arrival_date'   => 'required|date',
             'departure_date' => 'required|date',
-            'passengers' => 'required|integer',
-            'status' => 'required|string',
-            'created_by' => 'required|integer',
+            'passengers'     => 'required|integer',
+            'status'         => 'required|string',
+            'created_by'     => 'required|integer',
 
-            // optional extras
-            'transport_id' => 'nullable|integer',
-            'vehicle_no' => 'nullable|string',
-            'reason' => 'nullable|string',
-            'contact_no' => 'nullable|string',
-            'vehicle_type' => 'nullable|string',
+            'transport_id'   => 'nullable|integer',
+            'vehicle_no'     => 'nullable|string',
+            'reason'         => 'nullable|string',
+            'contact_no'     => 'nullable|string',
+            'vehicle_type'   => 'nullable|string',
         ]);
 
         $rental = Rental::create([
+            'transport_id'   => $data['transport_id'] ?? null,
             'booking_number' => $data['booking_number'],
-            'vehicle_id' => $data['vehicle_id'],
-            'company_id' => $data['company_id'],
-            'driver_name' => $data['driver_name'],
-            'salutation' => null,
-            'arrival_date' => $data['arrival_date'],
+            'vehicle_id'     => $data['vehicle_id'],
+            'company_id'     => $data['company_id'],
+            'driver_name'    => $data['driver_name'],
+            'salutation'     => null,
+            'arrival_date'   => $data['arrival_date'],
             'departure_date' => $data['departure_date'],
-            'passengers' => $data['passengers'],
-            'status' => $data['status'],
-            'created_by' => $data['created_by'],
+            'passengers'     => $data['passengers'],
+            'status'         => $data['status'],
+            'created_by'     => $data['created_by'],
+        ]);
+
+        Log::info('Rental created from transport sync', [
+            'rental_id'     => $rental->id,
+            'transport_id'  => $data['transport_id'] ?? null,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Rental created successfully',
-            'data' => $rental,
+            'data'    => $rental,
         ], 201);
 
     } catch (Throwable $e) {
         Log::error('Rental Sync Error', [
             'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+            'trace'   => $e->getTraceAsString(),
         ]);
 
         return response()->json([
@@ -85,3 +90,4 @@ Route::post('/rental-sync', function (Request $request) {
         ], 500);
     }
 });
+
