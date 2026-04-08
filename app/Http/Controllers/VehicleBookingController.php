@@ -74,7 +74,7 @@ class VehicleBookingController extends Controller
         try {
             $response = Http::timeout(15)
                 ->acceptJson()
-                ->get('https://exploresuite.lk/api/chauffers');
+                ->get('http://127.0.0.1:9000/api/chauffers');
 
             Log::info('Chauffers API status', ['status' => $response->status()]);
             Log::info('Chauffers API response', ['body' => $response->body()]);

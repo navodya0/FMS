@@ -2,79 +2,63 @@
     .pac-container {
         z-index: 9999 !important;
     }
+
+    @media (min-width: 1200px) {
+        .modal-xl {
+            --bs-modal-width: 1420px !important;
+        }
+    }
 </style>
 
 {{-- CREATE MODAL --}}
 <div class="modal fade" id="transportServiceModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <form class="modal-content" method="POST" action="{{ route('transport-services.store') }}">
             @csrf
+
             <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="transportServiceTitle">Add Transport Service</h5>
+                <h5 class="modal-title fw-bold" id="transportServiceTitle">Add Shuttle Services</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
-                <input type="hidden" name="type" id="ts_type">
+                <input type="hidden" name="type" id="ts_type" value="shuttle">
 
-                <div class="row g-3">
-                    @php
-                        $now = \Carbon\Carbon::now()->format('Y-m-d\TH:i');
-                    @endphp
+                <div id="shuttleBulkFields">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Select Date<span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="shuttle_service_date" required>
+                        </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">
-                            Assigned Start<span class="text-danger">*</span>
-                        </label>
-                        <input class="form-control" type="datetime-local" name="assigned_start_at" id="create_start" min="{{ $now }}" required>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary w-50" id="loadShuttleBookingsBtn">
+                                Load Bookings
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">
-                            Assigned End (optional)
-                        </label>
-                        <input class="form-control" type="datetime-local" name="assigned_end_at" id="create_end" min="{{ $now }}">
+                    <div id="shuttleBookingsContainer" class="d-none">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Booking</th>
+                                        <th>Assigned Start</th>
+                                        <th>Assigned End</th>
+                                        <th>Vehicle</th>
+                                        <th>Chauffer</th>
+                                        <th>Pickup</th>
+                                        <th>Dropoff</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shuttleBookingsBody"></tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Vehicle<span class="text-danger">*</span></label>
-                        <select class="form-select vehicle-select-create" name="vehicle_id" id="create_vehicle_id" required>
-                            <option value="">Select vehicle</option>
-                            @foreach($vehicles as $vehicle)
-                                <option value="{{ $vehicle->id }}">{{ $vehicle->reg_no }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <small class="text-muted d-none" id="create_vehicle_loader">
-                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                        Loading vehicles...
-                    </small>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Chauffer<span class="text-danger">*</span></label>
-                       <select class="form-select" name="employee_id" id="create_chauffer_id" required>
-                            <option value="">Select chauffer</option>
-                            @foreach($chauffers as $c)
-                                <option value="{{ $c['employee_id'] }}" data-employee="{{ $c['employee_id'] }}">
-                                    {{ $c['preferred_name'] }} ({{ $c['whatsapp_number'] }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Pickup<span class="text-danger">*</span></label>
-                        <input class="form-control" type="text" id="pickup_location" name="pickup_location" value="Seeduwa Office" required >
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Dropoff<span class="text-danger">*</span></label>
-                        <input class="form-control" type="text" id="dropoff_location" name="dropoff_location" required >
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Passengers<span class="text-danger">*</span></label>
-                        <input class="form-control" type="number" name="passenger_count" min="1" required>
+                    <div id="shuttleNoBookings" class="alert alert-info d-none mb-0">
+                        No arrival or departure bookings found for the selected date.
                     </div>
                 </div>
             </div>

@@ -300,6 +300,12 @@ Route::post('/barrels', [BarrelController::class, 'store'])->name('barrels.store
 Route::delete('/barrels/{id}', [BarrelController::class, 'destroy'])->name('barrels.destroy');
 
 Route::post('/fuel-logs', [FuelLogController::class, 'store'])->name('fuel-logs.store');
+
+
+Route::get('/transport-services/shuttle-bookings', [TransportServiceController::class, 'getShuttleBookings'])
+    ->name('transport-services.shuttle-bookings');
+
+    
 });
 
 require __DIR__.'/auth.php';
