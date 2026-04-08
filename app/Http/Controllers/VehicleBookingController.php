@@ -263,28 +263,26 @@ class VehicleBookingController extends Controller
         ]);
     }
 
-public function search(Request $request)
-{
-    $reg = $request->reg_no;
-    $booking = $request->booking_no;
+    public function search(Request $request)
+    {
+        $reg = $request->reg_no;
+        $booking = $request->booking_no;
 
-    $vehicles = Vehicle::query()
-        ->when($reg, fn ($q) =>
-            $q->where('reg_no', 'like', "%{$reg}%")
-        )
-        ->when($booking, fn ($q) =>
-            $q->whereHas('rentals', fn ($r) =>
-                $r->where('booking_number', 'like', "%{$booking}%")
+        $vehicles = Vehicle::query()
+            ->when($reg, fn ($q) =>
+                $q->where('reg_no', 'like', "%{$reg}%")
             )
-        )
-        ->with(['rentals' => function ($q) use ($booking) {
-            $q->where('booking_number', 'like', "%{$booking}%")
-              ->select('id', 'vehicle_id', 'arrival_date');
-        }])
-        ->get();
+            ->when($booking, fn ($q) =>
+                $q->whereHas('rentals', fn ($r) =>
+                    $r->where('booking_number', 'like', "%{$booking}%")
+                )
+            )
+            ->with(['rentals' => function ($q) use ($booking) {
+                $q->where('booking_number', 'like', "%{$booking}%")
+                ->select('id', 'vehicle_id', 'arrival_date');
+            }])
+            ->get();
 
-    return response()->json($vehicles);
-}
-
-
+        return response()->json($vehicles);
+    }
 }

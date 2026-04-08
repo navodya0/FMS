@@ -18,7 +18,7 @@
 
                     $sidebarLinks = [
                         ['name' => 'Dashboard', 'icon' => 'dashboard.svg', 'route' => 'dashboard', 'permission' => null],
-                        ['name' => 'Reports', 'icon' => 'reports.svg', 'route' => 'reports.index', 'permission' => 'view_reports'],                        
+                        ['name' => 'Reports', 'icon' => 'reports.svg', 'route' => 'reports.index', 'permission' => null],                        
                         ['name' => 'Vehicle Details', 'icon' => 'details.svg', 'route' => 'vehicle-details.index', 'permission' => 'manage_vehicle_details'],
                         ['name' => 'Vehicle Fuel QR', 'icon' => 'qr.svg', 'route' => 'qr-details.index', 'permission' => null],
 

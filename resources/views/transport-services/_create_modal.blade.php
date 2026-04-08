@@ -17,8 +17,6 @@
             <div class="modal-body">
                 <input type="hidden" name="type" id="ts_type">
 
-
-
                 <div class="row g-3">
                     @php
                         $now = \Carbon\Carbon::now()->format('Y-m-d\TH:i');
