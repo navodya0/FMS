@@ -37,7 +37,7 @@ use App\Http\Controllers\VehicleDetailsController;
 use App\Http\Controllers\QRDetailsController;
 use App\Http\Controllers\FuelLogController;
 use App\Http\Controllers\BarrelController;
-
+    use App\Http\Controllers\TransferController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -305,7 +305,11 @@ Route::post('/fuel-logs', [FuelLogController::class, 'store'])->name('fuel-logs.
 Route::get('/transport-services/shuttle-bookings', [TransportServiceController::class, 'getShuttleBookings'])
     ->name('transport-services.shuttle-bookings');
 
-    
+
+
+
+Route::post('/transfers', [TransferController::class, 'store'])->name('transfers.store');
+Route::post('/transfers/assign', [TransferController::class, 'assign'])->name('transfers.assign');
 });
 
 require __DIR__.'/auth.php';

@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Models\Rental;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Transfer;
 
 class TransportServiceController extends Controller
 {
@@ -24,7 +25,10 @@ class TransportServiceController extends Controller
 
         $nextNumber = 1;
 
-        if ($lastRental && preg_match('/^' . preg_quote($prefix, '/') . '-(\d+)$/', $lastRental->booking_number, $matches)) {
+        if (
+            $lastRental &&
+            preg_match('/^' . preg_quote($prefix, '/') . '-(\d+)$/', $lastRental->booking_number, $matches)
+        ) {
             $nextNumber = ((int) $matches[1]) + 1;
         }
 
@@ -33,35 +37,37 @@ class TransportServiceController extends Controller
 
     public function store(Request $request, ErpApi $erp)
     {
-        Log::info('Shuttle bulk store request received', [
-            'user_id' => Auth::id(),
-            'payload' => $request->all(),
-        ]);
+        $type = $request->input('type');
+        $itemKey = $type === 'transfers' ? 'transfer_items' : 'shuttle_items';
 
         $data = $request->validate([
-            'type' => 'required|in:shuttle',
-            'shuttle_items' => 'required|array|min:1',
-            'shuttle_items.*.selected' => 'nullable|in:1',
-            'shuttle_items.*.transport_service_id' => 'nullable|exists:transport_services,id',
-            'shuttle_items.*.rental_id' => 'nullable|exists:rentals,id',
-            'shuttle_items.*.vehicle_id' => 'nullable|exists:vehicles,id',
-            'shuttle_items.*.employee_id' => 'nullable|integer',
-            'shuttle_items.*.assigned_start_at' => 'nullable|date',
-            'shuttle_items.*.assigned_end_at' => 'nullable|date',
-            'shuttle_items.*.pickup_location' => 'nullable|string|max:255',
-            'shuttle_items.*.dropoff_location' => 'nullable|string|max:255',
-            'shuttle_items.*.passenger_count' => 'nullable|integer|min:1',
-            'shuttle_items.*.trip_code' => 'nullable|string|max:255',
-            'shuttle_items.*.note' => 'nullable|string',
+            'type' => 'required|in:shuttle,transfers',
+
+            "{$itemKey}" => 'required|array|min:1',
+            "{$itemKey}.*.selected" => 'nullable|in:1',
+            "{$itemKey}.*.transport_service_id" => 'nullable|exists:transport_services,id',
+            "{$itemKey}.*.rental_id" => 'nullable|exists:rentals,id',
+            "{$itemKey}.*.transfer_id" => 'nullable|exists:transfers,id',
+            "{$itemKey}.*.vehicle_id" => 'nullable|exists:vehicles,id',
+            "{$itemKey}.*.vehicle_type_id" => 'nullable|exists:vehicle_types,id',
+            "{$itemKey}.*.employee_id" => 'nullable|integer',
+            "{$itemKey}.*.assigned_start_at" => 'nullable|date',
+            "{$itemKey}.*.assigned_end_at" => 'nullable|date',
+            "{$itemKey}.*.pickup_location" => 'nullable|string|max:255',
+            "{$itemKey}.*.dropoff_location" => 'nullable|string|max:255',
+            "{$itemKey}.*.passenger_count" => 'nullable|integer|min:1',
+            "{$itemKey}.*.trip_code" => 'nullable|string|max:255',
+            "{$itemKey}.*.note" => 'nullable|string',
+            "{$itemKey}.*.is_vehicle_assigned" => 'nullable|boolean',
         ]);
 
-        $items = collect($data['shuttle_items'])
+        $items = collect($data[$itemKey])
             ->filter(fn ($item) => !empty($item['selected']))
             ->values();
 
         if ($items->isEmpty()) {
             return back()->withErrors([
-                'shuttle_items' => 'Please select at least one booking.'
+                $itemKey => 'Please select at least one booking.'
             ])->withInput();
         }
 
@@ -69,10 +75,12 @@ class TransportServiceController extends Controller
         $savedCount = 0;
         $erpFailed = [];
 
-        foreach ($items as $index => $item) {
+        foreach ($items as $item) {
             Validator::make($item, [
                 'rental_id' => 'nullable|exists:rentals,id',
-                'vehicle_id' => 'required|exists:vehicles,id',
+                'transfer_id' => $type === 'transfers' ? 'required|exists:transfers,id' : 'nullable',
+                'vehicle_id' => 'nullable|exists:vehicles,id',
+                'vehicle_type_id' => 'nullable|exists:vehicle_types,id',
                 'employee_id' => 'required|integer',
                 'assigned_start_at' => 'required|date',
                 'assigned_end_at' => 'nullable|date|after_or_equal:assigned_start_at',
@@ -81,70 +89,57 @@ class TransportServiceController extends Controller
                 'passenger_count' => 'nullable|integer|min:1',
                 'trip_code' => 'nullable|string|max:255',
                 'note' => 'nullable|string',
+                'is_vehicle_assigned' => 'nullable|boolean',
             ])->validate();
 
             try {
-                Log::info('Processing shuttle item', [
-                    'index' => $index,
-                    'item' => $item,
-                ]);
+                $isVehicleAssigned = array_key_exists('is_vehicle_assigned', $item)
+                    ? !empty($item['is_vehicle_assigned'])
+                    : !empty($item['vehicle_id']);
 
-                $vehicle = Vehicle::find($item['vehicle_id']);
+                $vehicle = !empty($item['vehicle_id']) ? Vehicle::find($item['vehicle_id']) : null;
 
-                $transportService = null;
+                $transportService = !empty($item['transport_service_id'])
+                    ? TransportService::find($item['transport_service_id'])
+                    : null;
 
-                if (!empty($item['transport_service_id'])) {
-                    $transportService = TransportService::find($item['transport_service_id']);
+                $transportPayload = [
+                    'rental_id' => $item['rental_id'] ?? null,
+                    'type' => $type,
+                    'vehicle_id' => $isVehicleAssigned ? ($item['vehicle_id'] ?? null) : null,
+                    'vehicle_type_id' => $isVehicleAssigned
+                        ? ($item['vehicle_type_id'] ?? $vehicle?->vehicle_type_id)
+                        : ($item['vehicle_type_id'] ?? null),
+                    'employee_id' => $item['employee_id'],
+                    'is_vehicle_assigned' => $isVehicleAssigned ? 1 : 0,
+                    'assigned_start_at' => $item['assigned_start_at'],
+                    'assigned_end_at' => $item['assigned_end_at'] ?? null,
+                    'pickup_location' => $item['pickup_location'],
+                    'dropoff_location' => $item['dropoff_location'],
+                    'passenger_count' => $item['passenger_count'] ?? null,
+                    'trip_code' => $item['trip_code'] ?? null,
+                    'note' => $item['note'] ?? null,
+                    'status' => 'ASSIGNED',
+                ];
+
+                if ($type === 'transfers') {
+                    $transportPayload['transfer_id'] = $item['transfer_id'];
                 }
 
                 if ($transportService) {
-                    $transportService->update([
-                        'rental_id' => $item['rental_id'] ?? null,
-                        'type' => 'shuttle',
-                        'vehicle_id' => $item['vehicle_id'],
-                        'vehicle_type_id' => $vehicle?->vehicle_type_id,
-                        'employee_id' => $item['employee_id'],
-                        'is_vehicle_assigned' => 1,
-                        'assigned_start_at' => $item['assigned_start_at'],
-                        'assigned_end_at' => $item['assigned_end_at'] ?? null,
-                        'pickup_location' => $item['pickup_location'],
-                        'dropoff_location' => $item['dropoff_location'],
-                        'passenger_count' => $item['passenger_count'] ?? null,
-                        'trip_code' => $item['trip_code'] ?? null,
-                        'note' => $item['note'] ?? null,
-                    ]);
-
-                    Log::info('TransportService updated', [
-                        'transport_service_id' => $transportService->id,
-                    ]);
+                    $transportService->update($transportPayload);
                 } else {
-                    $transportService = TransportService::create([
-                        'rental_id' => $item['rental_id'] ?? null,
-                        'type' => 'shuttle',
-                        'vehicle_id' => $item['vehicle_id'],
-                        'vehicle_type_id' => $vehicle?->vehicle_type_id,
-                        'employee_id' => $item['employee_id'],
-                        'is_vehicle_assigned' => 1,
-                        'assigned_start_at' => $item['assigned_start_at'],
-                        'assigned_end_at' => $item['assigned_end_at'] ?? null,
-                        'pickup_location' => $item['pickup_location'],
-                        'dropoff_location' => $item['dropoff_location'],
-                        'passenger_count' => $item['passenger_count'] ?? null,
-                        'trip_code' => $item['trip_code'] ?? null,
-                        'note' => $item['note'] ?? null,
-                    ]);
-
-                    Log::info('TransportService created', [
-                        'transport_service_id' => $transportService->id,
-                    ]);
+                    $transportService = TransportService::create($transportPayload);
                 }
 
-                if (!empty($item['vehicle_id'])) {
+                if ($isVehicleAssigned && !empty($item['vehicle_id'])) {
+                    $bookingType = $type === 'transfers' ? 'transfer' : $type;
+
                     $rental = Rental::create([
-                        'booking_number' => $this->generateBookingNumber($data['type']),
+                        'booking_number' => $this->generateBookingNumber($bookingType),
                         'vehicle_id' => $item['vehicle_id'],
                         'company_id' => 1,
-                        'driver_name' => $data['type'],
+                        'driver_name' => $bookingType,
                         'salutation' => null,
                         'arrival_date' => $item['assigned_start_at'],
                         'departure_date' => $item['assigned_end_at'] ?? $item['assigned_start_at'],
@@ -153,10 +148,11 @@ class TransportServiceController extends Controller
                         'created_by' => Auth::id(),
                     ]);
 
-                    Log::info('Rental created', [
-                        'rental_id' => $rental->id,
-                        'transport_service_id' => $transportService->id,
-                    ]);
+                    if ((int) $transportService->rental_id !== (int) $rental->id) {
+                        $transportService->update([
+                            'rental_id' => $rental->id,
+                        ]);
+                    }
                 }
 
                 $savedCount++;
@@ -164,13 +160,14 @@ class TransportServiceController extends Controller
                 $transportService->load(['vehicle', 'vehicleType']);
 
                 $employee = collect($chauffers)->firstWhere('employee_id', $item['employee_id']);
+                $erpType = $transportService->type;
 
                 $payload = [
                     'source_id' => $transportService->id,
-                    'type' => $transportService->type,
+                    'type' => $erpType,
                     'vehicle_no' => $transportService->vehicle?->reg_no,
                     'vehicle_type' => $transportService->vehicleType?->type_name,
-                    'is_vehicle_assigned' => '1',
+                    'is_vehicle_assigned' => (string) ($transportService->is_vehicle_assigned ? 1 : 0),
                     'employee_id' => $item['employee_id'],
                     'chauffer_phone' => $employee['whatsapp_number'] ?? null,
                     'chauffer_name' => $employee['preferred_name'] ?? null,
@@ -183,45 +180,45 @@ class TransportServiceController extends Controller
                     'status' => 'ASSIGNED',
                 ];
 
+                Log::info('ERP transport payload', [
+                    'mode' => !empty($item['transport_service_id']) ? 'update' : 'create',
+                    'transport_service_id' => $transportService->id,
+                    'type' => $type,
+                    'payload' => $payload,
+                ]);
+
                 try {
                     if (!empty($item['transport_service_id'])) {
                         $erp->updateTransport($transportService->id, $payload);
                     } else {
                         $erp->createTransport($payload);
                     }
-
-                    Log::info('ERP sync success', [
-                        'transport_service_id' => $transportService->id,
-                    ]);
                 } catch (\Throwable $e) {
-                    Log::error('ERP sync failed', [
+                    Log::error('ERP transport sync failed', [
                         'transport_service_id' => $transportService->id,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
+                        'type' => $type,
+                        'message' => $e->getMessage(),
+                        'payload' => $payload,
                     ]);
 
                     $erpFailed[] = $transportService->id;
                 }
             } catch (\Throwable $e) {
-                Log::error('Failed processing shuttle item', [
-                    'index' => $index,
+                Log::error('Transport service store failed', [
+                    'type' => $type,
+                    'message' => $e->getMessage(),
                     'item' => $item,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
                 ]);
+
+                continue;
             }
         }
 
-        Log::info('Shuttle bulk store completed', [
-            'saved' => $savedCount,
-            'erp_failed' => $erpFailed,
-        ]);
-
         if (!empty($erpFailed)) {
-            return back()->with('warning', "{$savedCount} shuttle transport service(s) saved, but ERP sync failed for some records.");
+            return back()->with('warning', "{$savedCount} {$type} transport service(s) saved, but ERP sync failed for some records.");
         }
 
-        return back()->with('success', "{$savedCount} shuttle transport service(s) saved successfully.");
+        return back()->with('success', "{$savedCount} {$type} transport service(s) saved successfully.");
     }
 
     public function update(Request $request, TransportService $transportService, ErpApi $erp)
@@ -418,10 +415,15 @@ class TransportServiceController extends Controller
         $date = Carbon::parse($request->date)->toDateString();
 
         $rentals = Rental::query()
-            ->where(function ($q) use ($date) {
-                $q->whereDate('arrival_date', $date)
-                  ->orWhereDate('departure_date', $date);
-            })
+            ->where(fn ($q) => $q
+                ->whereDate('arrival_date', $date)
+                ->orWhereDate('departure_date', $date))
+            ->where(fn ($q) => $q
+                ->whereNull('driver_name')
+                ->orWhereNotIn('driver_name', ['shuttle', 'transfer', 'transfers']))
+            ->where('booking_number', 'not like', 'shuttle-%')
+            ->where('booking_number', 'not like', 'transfer-%')
+            ->where('booking_number', 'not like', 'transfers-%')
             ->orderBy('arrival_date')
             ->orderBy('departure_date')
             ->get([
@@ -438,74 +440,51 @@ class TransportServiceController extends Controller
                 'emer_no_of_passengers',
             ]);
 
-        $data = $rentals->flatMap(function ($r) use ($date) {
+        $buildRow = function ($r, string $tripType, ?TransportService $existing) {
+            return [
+                'id' => $r->id,
+                'booking_number' => $r->booking_number,
+                'customer_name' => $r->emer_customer_name ?: $r->driver_name,
+                'salutation' => $r->salutation,
+                'arrival_date' => optional($r->arrival_date)->format('Y-m-d H:i:s'),
+                'departure_date' => optional($r->departure_date)->format('Y-m-d H:i:s'),
+                'passengers' => $r->emer_no_of_passengers ?: $r->passengers,
+                'notes' => $r->notes,
+                'vehicle_pickup' => $r->vehicle_pickup,
+                'trip_type' => $tripType,
+
+                'existing_transport_id' => $existing?->id,
+                'existing_vehicle_id' => $existing?->vehicle_id,
+                'existing_employee_id' => $existing?->employee_id,
+                'existing_assigned_start_at' => $existing?->assigned_start_at
+                    ? Carbon::parse($existing->assigned_start_at)->format('Y-m-d H:i:s')
+                    : null,
+                'existing_assigned_end_at' => $existing?->assigned_end_at
+                    ? Carbon::parse($existing->assigned_end_at)->format('Y-m-d H:i:s')
+                    : null,
+                'existing_pickup_location' => $existing?->pickup_location,
+                'existing_dropoff_location' => $existing?->dropoff_location,
+                'existing_passenger_count' => $existing?->passenger_count,
+                'existing_note' => $existing?->note,
+            ];
+        };
+
+        $getExisting = fn ($rentalId, $tripType) => TransportService::query()
+            ->where('type', 'shuttle')
+            ->where('rental_id', $rentalId)
+            ->where('trip_code', $tripType)
+            ->latest('id')
+            ->first();
+
+        $data = $rentals->flatMap(function ($r) use ($date, $buildRow, $getExisting) {
             $rows = [];
 
-            $customerName = $r->emer_customer_name ?: $r->driver_name;
-            $passengers = $r->emer_no_of_passengers ?: $r->passengers;
-
             if ($r->arrival_date && Carbon::parse($r->arrival_date)->toDateString() === $date) {
-                $existingArrival = TransportService::query()
-                    ->where('type', 'shuttle')
-                    ->where('rental_id', $r->id)
-                    ->where('trip_code', 'arrival')
-                    ->latest('id')
-                    ->first();
-
-                $rows[] = [
-                    'id' => $r->id,
-                    'booking_number' => $r->booking_number,
-                    'customer_name' => $customerName,
-                    'salutation' => $r->salutation,
-                    'arrival_date' => optional($r->arrival_date)->format('Y-m-d H:i:s'),
-                    'departure_date' => optional($r->departure_date)->format('Y-m-d H:i:s'),
-                    'passengers' => $passengers,
-                    'notes' => $r->notes,
-                    'vehicle_pickup' => $r->vehicle_pickup,
-                    'trip_type' => 'arrival',
-
-                    'existing_transport_id' => $existingArrival?->id,
-                    'existing_vehicle_id' => $existingArrival?->vehicle_id,
-                    'existing_employee_id' => $existingArrival?->employee_id,
-                    'existing_assigned_start_at' => $existingArrival?->assigned_start_at ? Carbon::parse($existingArrival->assigned_start_at)->format('Y-m-d H:i:s') : null,
-                    'existing_assigned_end_at' => $existingArrival?->assigned_end_at ? Carbon::parse($existingArrival->assigned_end_at)->format('Y-m-d H:i:s') : null,
-                    'existing_pickup_location' => $existingArrival?->pickup_location,
-                    'existing_dropoff_location' => $existingArrival?->dropoff_location,
-                    'existing_passenger_count' => $existingArrival?->passenger_count,
-                    'existing_note' => $existingArrival?->note,
-                ];
+                $rows[] = $buildRow($r, 'arrival', $getExisting($r->id, 'arrival'));
             }
 
             if ($r->departure_date && Carbon::parse($r->departure_date)->toDateString() === $date) {
-                $existingDeparture = TransportService::query()
-                    ->where('type', 'shuttle')
-                    ->where('rental_id', $r->id)
-                    ->where('trip_code', 'departure')
-                    ->latest('id')
-                    ->first();
-
-                $rows[] = [
-                    'id' => $r->id,
-                    'booking_number' => $r->booking_number,
-                    'customer_name' => $customerName,
-                    'salutation' => $r->salutation,
-                    'arrival_date' => optional($r->arrival_date)->format('Y-m-d H:i:s'),
-                    'departure_date' => optional($r->departure_date)->format('Y-m-d H:i:s'),
-                    'passengers' => $passengers,
-                    'notes' => $r->notes,
-                    'vehicle_pickup' => $r->vehicle_pickup,
-                    'trip_type' => 'departure',
-
-                    'existing_transport_id' => $existingDeparture?->id,
-                    'existing_vehicle_id' => $existingDeparture?->vehicle_id,
-                    'existing_employee_id' => $existingDeparture?->employee_id,
-                    'existing_assigned_start_at' => $existingDeparture?->assigned_start_at ? Carbon::parse($existingDeparture->assigned_start_at)->format('Y-m-d H:i:s') : null,
-                    'existing_assigned_end_at' => $existingDeparture?->assigned_end_at ? Carbon::parse($existingDeparture->assigned_end_at)->format('Y-m-d H:i:s') : null,
-                    'existing_pickup_location' => $existingDeparture?->pickup_location,
-                    'existing_dropoff_location' => $existingDeparture?->dropoff_location,
-                    'existing_passenger_count' => $existingDeparture?->passenger_count,
-                    'existing_note' => $existingDeparture?->note,
-                ];
+                $rows[] = $buildRow($r, 'departure', $getExisting($r->id, 'departure'));
             }
 
             return $rows;

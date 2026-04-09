@@ -5,7 +5,7 @@
 
     @media (min-width: 1200px) {
         .modal-xl {
-            --bs-modal-width: 1420px !important;
+            --bs-modal-width: 1700px !important;
         }
     }
 </style>
