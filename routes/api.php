@@ -91,3 +91,40 @@ Route::post('/rental-sync', function (Request $request) {
     }
 });
 
+
+Route::post('/rental-cancel', function (Request $request) {
+
+    $receivedSecret = $request->header('X-SYNC-SECRET');
+    $expectedSecret = config('services.rental_sync.secret');
+
+    if (($receivedSecret ?? '') !== ($expectedSecret ?? '')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    $data = $request->validate([
+        'transport_id' => 'required|integer',
+    ]);
+
+    $rental = Rental::where('transport_id', $data['transport_id'])->first();
+
+    if (!$rental) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Rental not found',
+        ], 404);
+    }
+
+    // store for response/logging before delete
+    $deletedRental = $rental->toArray();
+
+    $rental->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Rental deleted successfully',
+        'data' => $deletedRental
+    ]);
+});

@@ -205,6 +205,11 @@
         background: #f2f2f2;
         z-index: 40;
     }
+
+    .personal-booking {
+        background-color: #ffbf69  !important; 
+        color: #fff;
+    }
 </style>
 
 <div class="container-fluid">

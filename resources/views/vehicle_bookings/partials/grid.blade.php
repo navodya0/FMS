@@ -1,5 +1,6 @@
 <div class="container mb-2">
     <div class="d-flex gap-3 align-items-center">
+        <div class="fw-bold"><span class="legend-box personal-booking"></span> Personal Booking</div>
         <div class="fw-bold"><span class="legend-box past-booking"></span> Past Booking</div>
         <div class="fw-bold"><span class="legend-box current-booking"></span> On Tour</div>
         <div class="fw-bold"><span class="legend-box future-booking"></span> Future Bookings</div>
@@ -258,7 +259,7 @@
 
                             $creatorName = data_get($booking, 'creator.causer.name')
                                         ?? data_get($booking, 'creatorName.name')
-                                        ?? 'System';  
+                                        ?? 'EES APP';  
                                                               
                             // $creatorName = $creatorName === 'N/A' ? 'System' : $creatorName;
 
@@ -286,7 +287,11 @@
                                 }
                         @endphp
 
-                      <td class="booking-cell {{ $cellClass }}" 
+                        @php
+                            $isPersonal = str_contains($booking->booking_number, 'PERSONAL');
+                        @endphp
+
+                        <td class="booking-cell {{ $cellClass }} {{ $isPersonal ? 'personal-booking' : '' }}"
                         colspan="{{ $colspan }}"
                         data-booking-id="{{ $booking->id }}"
                         data-arrival="{{ $booking->arrival_date }}"
