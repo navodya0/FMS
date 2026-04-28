@@ -426,13 +426,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         value="${assignedStart}">
                 </td>
 
-                <td>
-                    <input type="datetime-local"
-                        class="form-control shuttle-end shuttle-field"
-                        name="shuttle_items[${index}][assigned_end_at]"
-                        value="${assignedEnd}">
-                </td>
-
+        
                 <td>
                     <select class="form-select shuttle-vehicle-select shuttle-field"
                         name="shuttle_items[${index}][vehicle_id]">

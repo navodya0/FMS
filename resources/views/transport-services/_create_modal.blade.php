@@ -45,7 +45,6 @@
                                     <tr>
                                         <th>Booking</th>
                                         <th>Assigned Start</th>
-                                        <th>Assigned End</th>
                                         <th>Vehicle</th>
                                         <th>Chauffer</th>
                                         <th>Pickup</th>

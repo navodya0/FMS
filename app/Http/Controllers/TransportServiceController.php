@@ -492,4 +492,55 @@ class TransportServiceController extends Controller
 
         return response()->json($data);
     }
+
+    public function getAvailableVehicles(Request $request)
+    {
+        $data = $request->validate([
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        $start = Carbon::parse($data['start_date'])->startOfDay();
+        $end = Carbon::parse($data['end_date'])->endOfDay();
+
+        $vehicles = Vehicle::query()
+            ->with(['company', 'vehicleType'])
+            ->where('status', '!=', 'disabled')
+
+            // Exclude frozen vehicles in selected date range
+            ->whereDoesntHave('freezes', function ($q) use ($start, $end) {
+                $q->whereDate('start_date', '<=', $end)
+                ->where(function ($sub) use ($start) {
+                    $sub->whereNull('end_date')
+                        ->orWhereDate('end_date', '>=', $start);
+                });
+            })
+
+            ->whereDoesntHave('rentals', function ($q) use ($start, $end) {
+                $q->where('status', '!=', 'arrived')
+                ->whereDate('arrival_date', '<=', $end)
+                ->whereDate('departure_date', '>=', $start);
+            })
+
+            ->orderBy('reg_no')
+            ->get()
+            ->map(function ($vehicle) {
+                return [
+                    'id' => $vehicle->id,
+                    'reg_no' => $vehicle->reg_no,
+                    'make' => $vehicle->make,
+                    'model' => $vehicle->model,
+                    'company_id' => $vehicle->company_id,
+                    'company_name' => $vehicle->company->name ?? null,
+                    'vehicle_type_id' => $vehicle->vehicle_type_id,
+                    'vehicle_type_name' => $vehicle->vehicleType->type_name ?? null,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Available vehicles fetched successfully.',
+            'data' => $vehicles,
+        ]);
+    }
 }

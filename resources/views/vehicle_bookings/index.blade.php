@@ -158,18 +158,27 @@
 
     .booking-table thead tr:first-child th:nth-child(1),
     .booking-table tbody td:nth-child(1){
-        width:120px; min-width:120px; max-width:120px;
+            min-width: 80px;
+    max-width: 100px;
     }
 
     .booking-table thead tr:first-child th:nth-child(2),
     .booking-table tbody td:nth-child(2){
-        width:220px; min-width:220px; max-width:220px;
+            min-width: 80px;
+    max-width: 100px;
     }
 
     .booking-table thead tr:first-child th:nth-child(3),
     .booking-table tbody td:nth-child(3){
-        width:110px; min-width:110px; max-width:110px;
+           min-width: 80px;
+    max-width: 100px;
     }
+
+
+
+
+
+    
 
     .booking-table thead tr:nth-child(2) th{
         width:34px; min-width:34px; max-width:34px;
@@ -186,7 +195,7 @@
     .booking-table thead tr:first-child th:nth-child(2),
     .booking-table tbody td:nth-child(2){
         position: sticky;
-        left: 120px; 
+        /* left: 120px;  */
         z-index: 30;
         background: #fff;
     }
@@ -194,7 +203,7 @@
     .booking-table thead tr:first-child th:nth-child(3),
     .booking-table tbody td:nth-child(3){
         position: sticky;
-        left: 340px; 
+        /* left: 340px;  */
         z-index: 30;
         background: #fff;
     }

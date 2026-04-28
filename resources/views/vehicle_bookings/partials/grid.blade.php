@@ -257,9 +257,17 @@
                                 $canOpenModal = true;
                             }
 
+                            $bookingNumber = strtoupper($booking->booking_number ?? '');
+
+                            $isSpecialBooking =
+                                str_contains($bookingNumber, 'PERSONAL') ||
+                                str_contains($bookingNumber, 'shuttle') ||
+                                str_contains($bookingNumber, 'transfers') ||
+                                str_contains($bookingNumber, 'OFFICE');
+
                             $creatorName = data_get($booking, 'creator.causer.name')
                                         ?? data_get($booking, 'creatorName.name')
-                                        ?? 'EES APP';  
+                                        ?? ($isSpecialBooking ? 'EES APP' : 'Deshan');
                                                               
                             // $creatorName = $creatorName === 'N/A' ? 'System' : $creatorName;
 

@@ -14,7 +14,11 @@ Route::post('/transport-services/validate-vehicle', [
     TransportServiceController::class, 'validateVehicleForTransport'
 ]);
 
+Route::post('/transport-services/sync-vehicle-assignment', [TransportServiceController::class, 'syncVehicleAssignment']);
+
 Route::get('/vehicle-details/{vehicleNumber}', [QRDetailsController::class, 'getVehicleDetails']);
+
+Route::get('/available-vehicles', [TransportServiceController::class, 'getAvailableVehicles']);
 
 Route::post('/rental-sync', function (Request $request) {
     $receivedSecret = $request->header('X-SYNC-SECRET');
@@ -90,7 +94,6 @@ Route::post('/rental-sync', function (Request $request) {
         ], 500);
     }
 });
-
 
 Route::post('/rental-cancel', function (Request $request) {
 
