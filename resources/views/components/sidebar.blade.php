@@ -21,6 +21,7 @@
                         ['name' => 'Reports', 'icon' => 'reports.svg', 'route' => 'reports.index', 'permission' => null],                        
                         ['name' => 'Vehicle Details', 'icon' => 'details.svg', 'route' => 'vehicle-details.index', 'permission' => 'manage_vehicle_details'],
                         ['name' => 'Vehicle Fuel QR', 'icon' => 'qr.svg', 'route' => 'qr-details.index', 'permission' => null],
+                        ['name' => 'Vehicle Booking Calendar', 'icon' => 'calendar.svg', 'route' => 'vehicle.booking.calendar', 'permission' => null],
 
                         ['name' => 'Fuel Logs', 'icon' => 'fuel.svg', 'route' => 'fuel-logs.index', 'permission' => 'manage_procurements'],
 

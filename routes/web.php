@@ -37,7 +37,8 @@ use App\Http\Controllers\VehicleDetailsController;
 use App\Http\Controllers\QRDetailsController;
 use App\Http\Controllers\FuelLogController;
 use App\Http\Controllers\BarrelController;
-    use App\Http\Controllers\TransferController;
+use App\Http\Controllers\TransferController;
+use App\Http\Controllers\VehicleBookingCalendarController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -310,6 +311,15 @@ Route::get('/transport-services/shuttle-bookings', [TransportServiceController::
 
 Route::post('/transfers', [TransferController::class, 'store'])->name('transfers.store');
 Route::post('/transfers/assign', [TransferController::class, 'assign'])->name('transfers.assign');
+
+
+
+
+Route::get('/vehicle-booking-calendar', [VehicleBookingCalendarController::class, 'index'])
+    ->name('vehicle.booking.calendar');
+
+Route::get('/vehicle-booking-calendar/export-csv', [VehicleBookingCalendarController::class, 'exportCsv'])
+    ->name('vehicle.booking.calendar.export.csv');
 });
 
 require __DIR__.'/auth.php';
