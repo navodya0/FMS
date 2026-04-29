@@ -41,6 +41,7 @@ class VehicleUtilizationController extends Controller
             ->toArray();
 
         $vehicles = Vehicle::with('company')
+            ->where('status', '!=', 'disabled')
             ->orderBy('reg_no')
             ->get();
 
