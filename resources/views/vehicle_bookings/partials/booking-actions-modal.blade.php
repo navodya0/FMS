@@ -37,6 +37,11 @@
                         <li class="dropdown-item booked-only d-none fw-bold text-danger" data-action="cancel-booking">
                             Cancel Booking
                         </li>
+                        <li class="dropdown-item booked-only d-none fw-bold text-secondary" id="editDepartureTimeBtn" data-action="edit-departure-time"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editDepartureTimeModal">
+                            Edit Departure Time
+                        </li>
                     
                         <li class="dropdown-item not-booked d-none fw-bold text-primary" data-action="mark-arrived">
                             Mark Arrived

@@ -320,6 +320,14 @@ Route::get('/vehicle-booking-calendar', [VehicleBookingCalendarController::class
 
 Route::get('/vehicle-booking-calendar/export-csv', [VehicleBookingCalendarController::class, 'exportCsv'])
     ->name('vehicle.booking.calendar.export.csv');
+
+
+    Route::patch('/rentals/{rental}/departure-time', [RentalController::class, 'updateDepartureTime'])
+    ->name('rentals.updateDepartureTime');
+
+
+    Route::get('/vehicles/available-by-date', [VehicleController::class, 'availableByDate'])
+    ->name('vehicles.availableByDate');
 });
 
 require __DIR__.'/auth.php';

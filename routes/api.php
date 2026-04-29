@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Models\Rental;
+use App\Http\Controllers\Api\VehicleUtilizationController;
+
 
 Route::middleware('api_token')->get('/vehicles/by-reg-no', [VehicleLookupController::class, 'byRegNo']);
 
@@ -131,3 +133,6 @@ Route::post('/rental-cancel', function (Request $request) {
         'data' => $deletedRental
     ]);
 });
+
+
+Route::get('/vehicle-utilization', [VehicleUtilizationController::class, 'summary']);

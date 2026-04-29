@@ -607,4 +607,26 @@ class RentalController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+
+    public function updateDepartureTime(Request $request, Rental $rental)
+    {
+        $request->validate([
+            'departure_time' => 'required|date_format:H:i',
+        ]);
+
+        $departureDate = \Carbon\Carbon::parse($rental->departure_date);
+
+        $rental->departure_date = $departureDate->format('Y-m-d') . ' ' . $request->departure_time . ':00';
+        $rental->save();
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($rental)
+            ->log('Updated rental departure time');
+
+        return back()->with('success', 'Departure time updated successfully.');
+    }
+
+
 }

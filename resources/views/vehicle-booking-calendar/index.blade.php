@@ -32,7 +32,7 @@
 
     .month-form input {
         padding: 6px 10px;
-        border: 1px solid #ccc;
+        border: 1px solid #000;
         border-radius: 5px;
         font-size: 13px;
     }
@@ -83,104 +83,109 @@
         overflow-x: auto;
     }
 
+    #vehicleCalendarTable {
+        border-collapse: collapse !important;
+        border: 1px solid #000 !important;
+        width: 100% !important;
+    }
+
+    #vehicleCalendarTable thead th,
+    #vehicleCalendarTable tbody td {
+        border: 1px solid #000 !important;
+        padding: 0 !important;
+        vertical-align: middle !important;
+        background: #fff;
+    }
+
+    #vehicleCalendarTable thead th {
+        font-weight: 700;
+        text-align: left;
+        padding: 8px !important;
+        background: #f8f9fa;
+        color: #000;
+    }
+
+    #vehicleCalendarTable tbody td.vehicle-col,
+    #vehicleCalendarTable tbody td:nth-child(2) {
+        padding: 8px !important;
+    }
+
     .timeline-header,
     .timeline-grid {
         display: grid;
-        grid-template-columns: repeat({{ $totalDays }}, 34px);
-        min-width: {{ $totalDays * 34 }}px;
+        grid-template-columns: repeat({{ $totalDays }}, 50px);
+        min-width: {{ $totalDays * 50 }}px;
+    }
+
+    .timeline-header {
+        border-left: 1px solid #000;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
     }
 
     .timeline-header div {
-        border: 1px solid #ddd;
-        padding: 3px 2px;
+        font-size: 12px;
+        line-height: 16px;
+        padding: 7px 4px;
+        font-weight: 700;
         text-align: center;
-        font-size: 10px;
-        line-height: 12px;
-        background: #f8f9fa;
+        background: #fff;
+        border-right: 1px solid #000;
+        color: #000;
     }
 
     .timeline-grid {
         position: relative;
-        min-height: 24px;
-        padding: 1px 0;
-        row-gap: 1px;
+        min-height: 44px;
+        padding: 0;
+        overflow: hidden;
+        border-left: 1px solid #000;
     }
 
     .day-bg {
-        border-left: 1px solid #eee;
-        border-right: 1px solid #eee;
-        grid-row: 1 / 20;
-        min-height: 24px;
+        border-right: 1px solid #000;
+        grid-row: 1;
+        height: 44px;
+        min-height: 44px;
     }
 
     .booking-range {
-        height: 18px;
-        color: #fff;
-        border-radius: 4px;
-        font-size: 10px;
-        line-height: 18px;
+        height: 28px;
+        font-size: 16px;
+        line-height: 28px;
         text-align: center;
-        cursor: pointer;
         position: relative;
         z-index: 5;
-        margin: 1px;
-        overflow: visible;
+        margin: 8px 1px;
+        overflow: hidden;
         padding: 0 4px;
         white-space: nowrap;
-        text-transform: capitalize;
+        border-radius: 0;
     }
 
-    .booking-color-0 { background: #dc3545; }
-    .booking-color-1 { background: #0d6efd; }
-    .booking-color-2 { background: #198754; }
-    .booking-color-3 { background: #fd7e14; }
-    .booking-color-4 { background: #6f42c1; }
-
-    .tooltip-box {
-        display: none;
-        position: absolute;
-        z-index: 9999;
-        background: #222;
+    .booking-bar {
+        background: #007288;
         color: #fff;
-        padding: 8px;
-        border-radius: 5px;
-        width: 240px;
-        text-align: left;
-        font-size: 12px;
-        line-height: 16px;
-        left: 50%;
-        top: 100%;
-        transform: translateX(-50%);
-        white-space: normal;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-        text-transform: none;
-    }
-
-    .booking-range:hover .tooltip-box {
-        display: block;
+        font-weight: 700;
+        border: 1px solid #005b6d;
     }
 
     .vehicle-col {
-        font-weight: bold;
+        font-weight: 700;
         white-space: nowrap;
-        font-size: 12px;
-    }
-
-    .usage-col {
-        font-weight: bold;
-        text-align: center;
-        white-space: nowrap;
-        font-size: 12px;
+        font-size: 13px;
+        color: #000;
     }
 
     .status-badge {
         color: #fff;
-        padding: 4px 8px;
+        padding: 5px 10px;
         border-radius: 12px;
         font-size: 11px;
+        font-weight: 700;
         text-transform: capitalize;
         display: inline-block;
-        min-width: 65px;
+        min-width: 74px;
         text-align: center;
     }
 
@@ -197,10 +202,18 @@
         color: #000;
     }
 
+    table.dataTable {
+        border-collapse: collapse !important;
+    }
+
+    table.dataTable.no-footer {
+        border-bottom: 1px solid #000 !important;
+    }
+
     table.dataTable td,
     table.dataTable th {
-        padding: 4px 6px !important;
-        vertical-align: middle;
+        border: 1px solid #000 !important;
+        box-sizing: border-box;
     }
 
     .dataTables_wrapper {
@@ -210,7 +223,14 @@
 
     .dataTables_filter,
     .dataTables_length {
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+    }
+
+    .dataTables_filter input,
+    .dataTables_length select {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 4px 8px;
     }
 
     @media (max-width: 768px) {
@@ -233,9 +253,10 @@
             <input type="month" name="month" value="{{ $selectedMonth }}">
             <button type="submit">Go</button>
         </form>
-<button type="button" id="exportExcelBtn" class="csv-export-btn">
-    Export Excel
-</button>
+
+        <button type="button" id="exportExcelBtn" class="csv-export-btn">
+            Export Excel
+        </button>
     </div>
 
     <div class="month-nav">
@@ -268,7 +289,6 @@
                             @endforeach
                         </div>
                     </th>
-                    <th>Usage %</th>
                 </tr>
             </thead>
 
@@ -291,42 +311,21 @@
                                     <div class="day-bg" style="grid-column: {{ $day->day }};"></div>
                                 @endforeach
 
-                                @foreach($row['ranges'] as $index => $range)
+                                @if(count($row['ranges']) > 0)
                                     @php
-                                        $booking = $range['rental'];
-
-                                        $arrivalDate = \Carbon\Carbon::parse($booking->arrival_date)->format('Y-m-d');
-                                        $departureDate = \Carbon\Carbon::parse($booking->departure_date)->format('Y-m-d');
-
-                                        $companyName = $booking->company->name
-                                            ?? $booking->company->company_name
-                                            ?? '-';
-
-                                        $rentalStatus = $booking->status ?: 'Booked';
+                                        $startDay = collect($row['ranges'])->min('start_day');
+                                        $endDay = collect($row['ranges'])->max('end_day');
                                     @endphp
 
-                                    <div class="booking-range booking-color-{{ $index % 5 }}"
+                                    <div class="booking-range booking-bar"
                                          style="
-                                            grid-column: {{ $range['start_day'] }} / {{ $range['end_day'] + 1 }};
-                                            grid-row: {{ $index + 1 }};
+                                            grid-column: {{ $startDay }} / {{ $endDay + 1 }};
+                                            grid-row: 1;
                                          ">
-                                        {{ $rentalStatus }}
-
-                                        <div class="tooltip-box">
-                                            <strong>Booked Dates:</strong><br>
-                                            {{ $arrivalDate }} to {{ $departureDate }}
-                                            <br><br>
-
-                                            <strong>Company:</strong><br>
-                                            {{ $companyName }}
-                                        </div>
+                                        {{ $row['usagePercent'] }}%
                                     </div>
-                                @endforeach
+                                @endif
                             </div>
-                        </td>
-
-                        <td class="usage-col">
-                            {{ $row['usagePercent'] }}%
                         </td>
                     </tr>
                 @endforeach
@@ -425,23 +424,23 @@
                 { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } }
             ];
 
-            styleRow(ws, 0, 0, 7, {
+            styleRow(ws, 0, 0, 4, {
                 fill: solidFill('1F4E78'),
                 font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
                 alignment: { horizontal: 'center', vertical: 'center' }
             });
 
-            styleRow(ws, 1, 0, 7, {
+            styleRow(ws, 1, 0, 4, {
                 fill: solidFill('D9EAF7'),
                 font: { bold: true, color: { rgb: '1F1F1F' } }
             });
 
-            styleRow(ws, 2, 0, 7, {
+            styleRow(ws, 2, 0, 4, {
                 fill: solidFill('D9EAF7'),
                 font: { bold: true, color: { rgb: '1F1F1F' } }
             });
 
-            styleRow(ws, 4, 0, 7, {
+            styleRow(ws, 4, 0, 4, {
                 fill: solidFill('2F75B5'),
                 font: { bold: true, color: { rgb: 'FFFFFF' } },
                 alignment: { horizontal: 'center', vertical: 'center' },
@@ -449,14 +448,14 @@
             });
 
             for (let r = 5; r < 5 + rows.length; r++) {
-            styleRow(ws, r, 0, 7, {
-                fill: solidFill('FFFFFF'),
-                font: { color: { rgb: '000000' } },
-                border: fullBorder('D9D9D9'),
-                alignment: { vertical: 'center' }
-            });
+                styleRow(ws, r, 0, 4, {
+                    fill: solidFill('FFFFFF'),
+                    font: { color: { rgb: '000000' } },
+                    border: fullBorder('D9D9D9'),
+                    alignment: { vertical: 'center' }
+                });
 
-                const statusRef = XLSX.utils.encode_cell({ r, c: 7 });
+                const statusRef = XLSX.utils.encode_cell({ r, c: 4 });
                 const status = ws[statusRef]?.v || '';
 
                 if (status === 'Excellent') {
@@ -523,25 +522,25 @@
             ws[ref].s = mergeStyle(ws[ref].s, style);
         }
 
-function mergeStyle(base, extra) {
-    return {
-        ...(base || {}),
-        ...(extra || {}),
-        font: {
-            ...(base?.font || {}),
-            ...(extra?.font || {})
-        },
-        fill: extra?.fill || base?.fill,
-        alignment: {
-            ...(base?.alignment || {}),
-            ...(extra?.alignment || {})
-        },
-        border: {
-            ...(base?.border || {}),
-            ...(extra?.border || {})
+        function mergeStyle(base, extra) {
+            return {
+                ...(base || {}),
+                ...(extra || {}),
+                font: {
+                    ...(base?.font || {}),
+                    ...(extra?.font || {})
+                },
+                fill: extra?.fill || base?.fill,
+                alignment: {
+                    ...(base?.alignment || {}),
+                    ...(extra?.alignment || {})
+                },
+                border: {
+                    ...(base?.border || {}),
+                    ...(extra?.border || {})
+                }
+            };
         }
-    };
-}
 
         function solidFill(rgb) {
             return {

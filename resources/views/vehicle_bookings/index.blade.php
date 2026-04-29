@@ -290,6 +290,8 @@
                 <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#transportServiceModal" data-type="shuttle" {{ $canManage ? '' : 'disabled' }} >
                     🚐 Shuttle
                 </button>
+
+                
             </div>
 
             <div class="month-nav">
@@ -324,6 +326,17 @@
                         � Shuttle Services
                     </button>
                 </li>
+
+                <li class="nav-item" role="presentation">
+    <button class="nav-link"
+            id="available-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#available-tab-pane"
+            type="button"
+            role="tab">
+        🚗 Available Vehicles
+    </button>
+</li>
             </ul>
             
             {{-- Tab Content --}}
@@ -505,115 +518,139 @@
                     @endforeach
                 </div>
 
-                {{-- Shuttle Services Tab --}}
-               <div
-    class="tab-pane fade"
-    id="shuttle-tab-pane"
-    role="tabpanel"
-    aria-labelledby="shuttle-tab"
-    tabindex="0"
->
-    @php
-        $dept = strtolower(trim(auth()->user()->department ?? ''));
-        $isAdmin = strtolower(trim(auth()->user()->name ?? '')) === 'admin';
-        $canManageShuttle = $isAdmin || $dept === 'rent a car department';
-    @endphp
+                <div class="tab-pane fade" id="available-tab-pane" role="tabpanel">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0">Shuttle Services</h5>
-
-        @if($canManageShuttle)
-            <button
-                class="btn btn-sm btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#transportServiceModal"
-                data-type="shuttle"
-            >
-                🚐 Add Shuttle
-            </button>
-        @endif
+        <h5 class="fw-bold mb-0">Available Vehicles</h5>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-striped align-middle" id="shuttleServicesTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Vehicle</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Pickup</th>
-                        <th>Dropoff</th>
-                        <th>Passengers</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $count = 1; @endphp
+    <!-- Date Filter -->
+    <div class="mb-3">
+        <label class="form-label fw-bold">Select Date</label>
+        <input type="date"
+       id="availableVehicleDate"
+       class="form-control w-25"
+       value="{{ now()->format('Y-m-d') }}">
+    </div>
 
-                    @foreach($transportServices as $ts)
-                        @if(strtolower(trim($ts->type)) === 'shuttle')
-                            @php
-                                $canEditRow = $isAdmin || $canManageShuttle;
-                            @endphp
-
-                            <tr>
-                                <td>{{ $count++ }}</td>
-                                <td>{{ $ts->vehicle->reg_no ?? '-' }}</td>
-                                <td>{{ optional($ts->assigned_start_at)->format('Y-m-d H:i') }}</td>
-                                <td>{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d H:i') : '-' }}</td>
-                                <td>{{ $ts->pickup_location }}</td>
-                                <td>{{ $ts->dropoff_location }}</td>
-                                <td>{{ $ts->passenger_count }}</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-warning {{ $canEditRow ? '' : 'disabled' }}"
-                                        @if($canEditRow)
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editTransportServiceModal"
-                                            data-id="{{ $ts->id }}"
-                                            data-type="{{ $ts->type }}"
-                                            data-vehicle_id="{{ $ts->vehicle_id }}"
-                                            data-chauffer_id="{{ $ts->chauffer_id }}"
-                                            data-start="{{ $ts->assigned_start_at ? $ts->assigned_start_at->format('Y-m-d\TH:i') : '' }}"
-                                            data-end="{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d\TH:i') : '' }}"
-                                            data-pickup="{{ $ts->pickup_location }}"
-                                            data-dropoff="{{ $ts->dropoff_location }}"
-                                            data-passengers="{{ $ts->passenger_count }}"
-                                            data-trip_code="{{ $ts->trip_code }}"
-                                            data-note="{{ $ts->note }}"
-                                        @else
-                                            type="button"
-                                            disabled
-                                            title="No permission for this type"
-                                        @endif
-                                    >
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-
-                                    <button
-                                        class="btn btn-sm btn-danger {{ $canEditRow ? '' : 'disabled' }}"
-                                        @if($canEditRow)
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteTransportServiceModal"
-                                            data-id="{{ $ts->id }}"
-                                        @else
-                                            type="button"
-                                            disabled
-                                            title="No permission for this type"
-                                        @endif
-                                    >
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        @endif
-                    @endforeach
-                </tbody>
-            </table>
+    <!-- Results -->
+    <div id="availableVehiclesContent">
+        <div class="text-muted text-center">
+            Select a date to view available vehicles
         </div>
     </div>
+
 </div>
+
+                {{-- Shuttle Services Tab --}}
+               <div
+                    class="tab-pane fade"
+                    id="shuttle-tab-pane"
+                    role="tabpanel"
+                    aria-labelledby="shuttle-tab"
+                    tabindex="0"
+                >
+                    @php
+                        $dept = strtolower(trim(auth()->user()->department ?? ''));
+                        $isAdmin = strtolower(trim(auth()->user()->name ?? '')) === 'admin';
+                        $canManageShuttle = $isAdmin || $dept === 'rent a car department';
+                    @endphp
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Shuttle Services</h5>
+
+                        @if($canManageShuttle)
+                            <button
+                                class="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#transportServiceModal"
+                                data-type="shuttle"
+                            >
+                                🚐 Add Shuttle
+                            </button>
+                        @endif
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-striped align-middle" id="shuttleServicesTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Vehicle</th>
+                                        <th>Start</th>
+                                        <th>End</th>
+                                        <th>Pickup</th>
+                                        <th>Dropoff</th>
+                                        <th>Passengers</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $count = 1; @endphp
+
+                                    @foreach($transportServices as $ts)
+                                        @if(strtolower(trim($ts->type)) === 'shuttle')
+                                            @php
+                                                $canEditRow = $isAdmin || $canManageShuttle;
+                                            @endphp
+
+                                            <tr>
+                                                <td>{{ $count++ }}</td>
+                                                <td>{{ $ts->vehicle->reg_no ?? '-' }}</td>
+                                                <td>{{ optional($ts->assigned_start_at)->format('Y-m-d H:i') }}</td>
+                                                <td>{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d H:i') : '-' }}</td>
+                                                <td>{{ $ts->pickup_location }}</td>
+                                                <td>{{ $ts->dropoff_location }}</td>
+                                                <td>{{ $ts->passenger_count }}</td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-sm btn-warning {{ $canEditRow ? '' : 'disabled' }}"
+                                                        @if($canEditRow)
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#editTransportServiceModal"
+                                                            data-id="{{ $ts->id }}"
+                                                            data-type="{{ $ts->type }}"
+                                                            data-vehicle_id="{{ $ts->vehicle_id }}"
+                                                            data-chauffer_id="{{ $ts->chauffer_id }}"
+                                                            data-start="{{ $ts->assigned_start_at ? $ts->assigned_start_at->format('Y-m-d\TH:i') : '' }}"
+                                                            data-end="{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d\TH:i') : '' }}"
+                                                            data-pickup="{{ $ts->pickup_location }}"
+                                                            data-dropoff="{{ $ts->dropoff_location }}"
+                                                            data-passengers="{{ $ts->passenger_count }}"
+                                                            data-trip_code="{{ $ts->trip_code }}"
+                                                            data-note="{{ $ts->note }}"
+                                                        @else
+                                                            type="button"
+                                                            disabled
+                                                            title="No permission for this type"
+                                                        @endif
+                                                    >
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+
+                                                    <button
+                                                        class="btn btn-sm btn-danger {{ $canEditRow ? '' : 'disabled' }}"
+                                                        @if($canEditRow)
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#deleteTransportServiceModal"
+                                                            data-id="{{ $ts->id }}"
+                                                        @else
+                                                            type="button"
+                                                            disabled
+                                                            title="No permission for this type"
+                                                        @endif
+                                                    >
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
             <div class="modal fade" id="extendFreezeModal" tabindex="-1" aria-labelledby="extendFreezeModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -671,6 +708,50 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="editDepartureTimeModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <form method="POST" id="editDepartureTimeForm">
+                        @csrf
+                        @method('PATCH')
+
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Edit Departure Time</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Departure Date & Time</label>
+                                    <input type="text"
+                                        id="currentDepartureDisplay"
+                                        class="form-control"
+                                        readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">New Departure Time</label>
+                                    <input type="time"
+                                        name="departure_time"
+                                        id="departure_time"
+                                        class="form-control"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Save Time
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             {{-- Modals --}}
             @include('vehicle_freeze.partials.freeze-vehicle-modal')
             @include('vehicle_bookings.partials.booking-actions-modal')
@@ -686,36 +767,98 @@
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        function initShuttleTable() {
-            if (!$.fn.DataTable.isDataTable('#shuttleServicesTable')) {
-                $('#shuttleServicesTable').DataTable({
-                    responsive: true,
-                    pageLength: 10,
-                    order: [[2, 'desc']],
-                    columnDefs: [
-                        {
-                            targets: -1,
-                            orderable: false,
-                            searchable: false
-                        }
-                    ]
-                });
-            } else {
-                $('#shuttleServicesTable').DataTable().columns.adjust().responsive.recalc();
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function initShuttleTable() {
+                if (!$.fn.DataTable.isDataTable('#shuttleServicesTable')) {
+                    $('#shuttleServicesTable').DataTable({
+                        responsive: true,
+                        pageLength: 10,
+                        order: [[2, 'desc']],
+                        columnDefs: [
+                            {
+                                targets: -1,
+                                orderable: false,
+                                searchable: false
+                            }
+                        ]
+                    });
+                } else {
+                    $('#shuttleServicesTable').DataTable().columns.adjust().responsive.recalc();
+                }
             }
-        }
 
-        $('button[data-bs-target="#shuttle-tab-pane"]').on('shown.bs.tab', function () {
-            initShuttleTable();
+            $('button[data-bs-target="#shuttle-tab-pane"]').on('shown.bs.tab', function () {
+                initShuttleTable();
+            });
+
+            if ($('#shuttle-tab-pane').hasClass('show') || $('#shuttle-tab-pane').hasClass('active')) {
+                initShuttleTable();
+            }
         });
 
-        if ($('#shuttle-tab-pane').hasClass('show') || $('#shuttle-tab-pane').hasClass('active')) {
-            initShuttleTable();
-        }
-    });
-</script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const dateInput = document.getElementById('availableVehicleDate');
+    const content = document.getElementById('availableVehiclesContent');
+
+    function loadAvailableVehicles() {
+        const date = dateInput.value;
+        if (!date) return;
+
+        content.innerHTML = `<div class="text-center text-muted">Loading...</div>`;
+
+        fetch(`/vehicles/available-by-date?date=${date}`)
+            .then(res => res.json())
+            .then(data => {
+                content.innerHTML = data.html;
+            });
+    }
+
+    // 🔥 Load immediately when tab opens
+    document.getElementById('available-tab')
+        .addEventListener('shown.bs.tab', function () {
+            loadAvailableVehicles();
+        });
+
+    // still allow manual change
+    dateInput.addEventListener('change', loadAvailableVehicles);
+
+});
+
+
+document.addEventListener('click', function(e) {
+    const cell = e.target.closest('.booking-cell');
+
+    if (!cell) return;
+    if (!cell.dataset.bookingId) return;
+
+    document.getElementById('modalBookingId').value = cell.dataset.bookingId;
+
+    document.getElementById('modalBookingId').dataset.departureDate =
+        cell.dataset.departureDate || '';
+});
+
+document.getElementById('editDepartureTimeModal')
+.addEventListener('show.bs.modal', function () {
+
+    const bookingInput = document.getElementById('modalBookingId');
+
+    const bookingId = bookingInput.value;
+    const departureDate = bookingInput.dataset.departureDate || '';
+
+    document.getElementById('editDepartureTimeForm').action =
+        `/rentals/${bookingId}/departure-time`;
+
+    document.getElementById('currentDepartureDisplay').value = departureDate;
+
+    if (departureDate.includes(' ')) {
+        document.getElementById('departure_time').value =
+            departureDate.split(' ')[1];
+    }
+});
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function(){
             document.body.classList.add('hide-sidebar');
@@ -1093,6 +1236,7 @@
         };
     </script>
 
+    
     <script>
         function unfreezeVehicle(freezeId) {
             if (!confirm('Are you sure you want to unfreeze this vehicle?')) return;

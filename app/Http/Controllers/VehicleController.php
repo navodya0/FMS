@@ -274,4 +274,34 @@ class VehicleController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
+
+    public function availableByDate(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        $date = \Carbon\Carbon::parse($request->date)->format('Y-m-d');
+
+        $vehicles = Vehicle::with(['vehicleType', 'vehicleCategory'])
+            ->where('status', 'active')
+            ->whereDoesntHave('rentals', function ($q) use ($date) {
+                $q->whereDate('arrival_date', '<=', $date)
+                ->whereDate('departure_date', '>=', $date)
+                ->whereIn('status', ['booked', 'rented', 'arrived']);
+            })
+            ->whereDoesntHave('freezes', function ($q) use ($date) {
+                $q->whereDate('start_date', '<=', $date)
+                ->where(function ($sub) use ($date) {
+                    $sub->whereNull('end_date')
+                        ->orWhereDate('end_date', '>=', $date);
+                });
+            })
+            ->get()
+            ->groupBy(fn ($v) => $v->vehicleType->type_name ?? 'Other');
+
+        return response()->json([
+            'html' => view('vehicle_bookings.partials.available-vehicles-accordion', compact('vehicles'))->render()
+        ]);
+    }
 }
