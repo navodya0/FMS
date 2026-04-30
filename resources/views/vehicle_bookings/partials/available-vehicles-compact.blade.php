@@ -5,31 +5,29 @@
 @else
     @foreach($vehicles as $type => $typeVehicles)
         @php
-            $categoryGroups = $typeVehicles->groupBy(fn ($v) => $v->vehicleCategory->name ?? 'Uncategorized');
+            $categoryGroups = $typeVehicles
+                ->groupBy(fn ($v) => $v->vehicleCategory->name ?? 'Uncategorized')
+                ->sortKeys();
         @endphp
 
         <div class="mb-2">
-            <div class="fw-bold small border-bottom">
-                {{ $type }}
-                <span class="badge bg-primary">{{ $typeVehicles->count() }}</span>
+            <!-- Type Row -->
+            <div class="d-flex align-items-center flex-wrap small border-bottom pb-1">
+                
+                <!-- Type Name -->
+                <span class="fw-bold me-2">
+                    {{ $type }} :
+                </span>
+
+                <!-- Categories -->
+                @foreach($categoryGroups as $category => $categoryVehicles)
+                    <span class="me-3 category-pill">
+                        {{ $category }} :
+                        <strong>{{ $categoryVehicles->count() }}</strong>
+                    </span>
+                @endforeach
+
             </div>
-
-            @foreach($categoryGroups as $category => $categoryVehicles)
-                <div class="mt-1">
-                    <div class="small text-muted">
-                        {{ $category }}
-                        <span class="badge bg-success">{{ $categoryVehicles->count() }}</span>
-                    </div>
-
-                    <div class="d-flex flex-wrap gap-1">
-                        @foreach($categoryVehicles as $v)
-                            <span class="badge bg-light text-dark border">
-                                {{ $v->reg_no }} - {{ $v->make }} {{ $v->model }}
-                            </span>
-                        @endforeach
-                    </div>
-                </div>
-            @endforeach
         </div>
     @endforeach
 @endif

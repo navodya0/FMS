@@ -222,7 +222,7 @@
 
 .available-today-floating {
     position: absolute;
-    left: calc(50% + 35px);
+    right: 2rem;
     top: 74px;
     width: calc(50% - 45px);
     height: 188px;
@@ -265,6 +265,24 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+.sr-elite-booking {
+    background: #6f42c1 !important; /* purple */
+    color: #fff !important;
+    border: 2px solid #000 !important;
+}
+
+.elite-sr-booking {
+    background: #6c757d !important; /* gray */
+    color: #fff !important;
+    border: 2px solid #000 !important;
+}
+
+.sr-elite-booking .booking-number,
+.elite-sr-booking .booking-number {
+    color: #fff !important;
+    font-weight: 800;
+}
 </style>
 
 <div class="container-fluid">
@@ -295,16 +313,16 @@
             </div>
         </div>
 
-            <div class="available-today-floating card shadow-sm">
-        <div class="card-header py-1 fw-bold d-flex justify-content-between">
-            <span>Available Today</span>
-            <small class="text-muted">{{ now()->format('Y-m-d') }}</small>
-        </div>
+        <div class="available-today-floating">
+            <div class="card-header py-1 fw-bold d-flex justify-content-between">
+                <span>Available Today</span>
+                <small class="text-muted">{{ now()->format('Y-m-d') }}</small>
+            </div>
 
-        <div class="card-body p-2" id="availableTodayContent">
-            <div class="text-muted text-center small">Loading...</div>
+            <div class="card-body p-2" id="availableTodayContent">
+                <div class="text-muted text-center small">Loading...</div>
+            </div>
         </div>
-    </div>
 
         <div class="btn-group ms-2" id="company-filter">
             <button class="btn btn-sm btn-outline-secondary active" data-company="">
@@ -844,21 +862,21 @@
             }
         });
 
-document.addEventListener('DOMContentLoaded', function () {
-    const content = document.getElementById('availableTodayContent');
-    if (!content) return;
+        document.addEventListener('DOMContentLoaded', function () {
+            const content = document.getElementById('availableTodayContent');
+            if (!content) return;
 
-    const today = new Date().toISOString().slice(0, 10);
+            const today = new Date().toISOString().slice(0, 10);
 
-    fetch(`/vehicles/available-by-date?date=${today}`)
-        .then(res => res.json())
-        .then(data => {
-            content.innerHTML = data.html;
-        })
-        .catch(() => {
-            content.innerHTML = `<div class="text-danger text-center small">Failed to load vehicles</div>`;
+            fetch(`/vehicles/available-by-date?date=${today}`)
+                .then(res => res.json())
+                .then(data => {
+                    content.innerHTML = data.html;
+                })
+                .catch(() => {
+                    content.innerHTML = `<div class="text-danger text-center small">Failed to load vehicles</div>`;
+                });
         });
-});
 
 
 document.addEventListener('click', function(e) {

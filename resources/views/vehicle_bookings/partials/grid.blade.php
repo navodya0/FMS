@@ -9,6 +9,12 @@
         <div class="fw-bold"><span class="legend-box past-date"></span> Underutilized</div>
         <div class="fw-bold"><span class="legend-box vehicle-frozen-date"></span> Frozen Date</div>
         <div class="fw-bold"><span class="legend-box alternative-range"></span> Alternative Vehicle</div>
+        <div class="fw-bold">
+            <span class="legend-box sr-elite-booking"></span> SR → Elite Booking
+        </div>
+        <div class="fw-bold">
+            <span class="legend-box elite-sr-booking"></span> Elite → SR Booking
+        </div>
     </div>
 </div>  
 
@@ -252,6 +258,32 @@
 
                                 $cellClass = 'future-booking';
                                 $canOpenModal = true;
+                            }
+
+                            $srCompanies = [1, 2, 4, 5];
+                            $eliteCompanies = [3, 6];
+
+                            $srUserIds = [66, 38];
+                            $eliteUserIds = [75];
+
+                            $vehicleIsSr = in_array($vehicle->company_id, $srCompanies);
+                            $vehicleIsElite = in_array($vehicle->company_id, $eliteCompanies);
+
+                            $creatorId =
+                                data_get($booking, 'creator.causer.id')
+                                ?? data_get($booking, 'creator_id')
+                                ?? data_get($booking, 'user_id');
+
+                            $creatorIsSr = in_array((int) $creatorId, $srUserIds);
+                            $creatorIsElite = in_array((int) $creatorId, $eliteUserIds);
+
+                            /* 🎯 Apply different colors */
+                            if ($vehicleIsSr && $creatorIsElite) {
+                                $cellClass .= ' sr-elite-booking';   // purple
+                            }
+
+                            if ($vehicleIsElite && $creatorIsSr) {
+                                $cellClass .= ' elite-sr-booking';   // gray
                             }
 
                             $bookingNumber = strtoupper($booking->booking_number ?? '');
