@@ -301,7 +301,7 @@ class VehicleController extends Controller
             ->groupBy(fn ($v) => $v->vehicleType->type_name ?? 'Other');
 
         return response()->json([
-            'html' => view('vehicle_bookings.partials.available-vehicles-accordion', compact('vehicles'))->render()
+            'html' => view('vehicle_bookings.partials.available-vehicles-compact', compact('vehicles'))->render()
         ]);
     }
 }

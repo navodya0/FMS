@@ -219,6 +219,52 @@
         background-color: #ffbf69  !important; 
         color: #fff;
     }
+
+.available-today-floating {
+    position: absolute;
+    left: calc(50% + 35px);
+    top: 74px;
+    width: calc(50% - 45px);
+    height: 188px;
+    z-index: 5;
+}
+
+.available-today-floating .card-header {
+    padding: 12px 16px;
+    font-weight: 700;
+}
+
+.available-today-floating .card-body {
+    height: 143px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 12px !important;
+}
+
+.available-today-floating .badge {
+    font-size: 11px;
+}
+
+.available-today-floating .border {
+    padding: 3px 7px !important;
+    font-size: 12px;
+}
+
+.vehicle-types-card {
+    height: 156px; /* match Available Today */
+}
+
+.vehicle-types-card .card-header {
+    height: 45px;
+    display: flex;
+    align-items: center;
+}
+
+.vehicle-types-card .card-body {
+    height: calc(188px - 45px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 </style>
 
 <div class="container-fluid">
@@ -226,10 +272,10 @@
         <a href="{{ route('dashboard') }}" class="btn btn-outline-primary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
-        <h2 class="fw-bold text-center mb-0 flex-grow-1">Vehicle Bookings Calendar</h2>
+        <h2 class="fw-bold text-left ms-5 mb-0 flex-grow-1">Vehicle Bookings Calendar</h2>
     </div>
     <div class="d-flex justify-content-between align-items-end mb-2">
-        <div class="card shadow-sm w-50">
+        <div class="card shadow-sm w-50 vehicle-types-card">
             <div class="card-header fw-bold">Vehicle Types</div>
             <div class="card-body d-flex gap-2 flex-wrap" id="vehicle-types-container">
                 @foreach($types as $type)
@@ -248,6 +294,18 @@
                 @endforeach
             </div>
         </div>
+
+            <div class="available-today-floating card shadow-sm">
+        <div class="card-header py-1 fw-bold d-flex justify-content-between">
+            <span>Available Today</span>
+            <small class="text-muted">{{ now()->format('Y-m-d') }}</small>
+        </div>
+
+        <div class="card-body p-2" id="availableTodayContent">
+            <div class="text-muted text-center small">Loading...</div>
+        </div>
+    </div>
+
         <div class="btn-group ms-2" id="company-filter">
             <button class="btn btn-sm btn-outline-secondary active" data-company="">
                 All
@@ -259,7 +317,6 @@
                 SR Rent A Car
             </button>
         </div>
-
         <div class="d-flex gap-2 w-35">
             <input type="text" id="reg-filter" class="form-control"
                 placeholder="Search by Reg No, Make , Model">
@@ -267,6 +324,7 @@
             <input type="text" id="booking-filter" class="form-control"
                 placeholder="Search by Booking No">
         </div>
+
     </div>
 
     <div class="card shadow-sm">
@@ -326,17 +384,6 @@
                         � Shuttle Services
                     </button>
                 </li>
-
-                <li class="nav-item" role="presentation">
-    <button class="nav-link"
-            id="available-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#available-tab-pane"
-            type="button"
-            role="tab">
-        🚗 Available Vehicles
-    </button>
-</li>
             </ul>
             
             {{-- Tab Content --}}
@@ -798,32 +845,19 @@
         });
 
 document.addEventListener('DOMContentLoaded', function () {
+    const content = document.getElementById('availableTodayContent');
+    if (!content) return;
 
-    const dateInput = document.getElementById('availableVehicleDate');
-    const content = document.getElementById('availableVehiclesContent');
+    const today = new Date().toISOString().slice(0, 10);
 
-    function loadAvailableVehicles() {
-        const date = dateInput.value;
-        if (!date) return;
-
-        content.innerHTML = `<div class="text-center text-muted">Loading...</div>`;
-
-        fetch(`/vehicles/available-by-date?date=${date}`)
-            .then(res => res.json())
-            .then(data => {
-                content.innerHTML = data.html;
-            });
-    }
-
-    // 🔥 Load immediately when tab opens
-    document.getElementById('available-tab')
-        .addEventListener('shown.bs.tab', function () {
-            loadAvailableVehicles();
+    fetch(`/vehicles/available-by-date?date=${today}`)
+        .then(res => res.json())
+        .then(data => {
+            content.innerHTML = data.html;
+        })
+        .catch(() => {
+            content.innerHTML = `<div class="text-danger text-center small">Failed to load vehicles</div>`;
         });
-
-    // still allow manual change
-    dateInput.addEventListener('change', loadAvailableVehicles);
-
 });
 
 
