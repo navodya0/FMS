@@ -33,7 +33,7 @@
     .month-form input,
     .month-form select {
         padding: 11px 14px;
-        border: 1px solid #000;
+        border: 1px solid #333;
         border-radius: 7px;
         font-size: 14px;
         background: #fff;
@@ -103,7 +103,7 @@
 
     #vehicleCalendarTable th,
     #vehicleCalendarTable td {
-        border: 1px solid #000 !important;
+        border: 1px solid #333 !important;
         vertical-align: middle;
     }
 
@@ -123,31 +123,86 @@
         font-size: 10px;
         padding: 5px 1px;
         text-align: center;
-        border-right: 1px solid #000;
+        border-right: 1px solid #333;
         font-weight: 700;
     }
 
     .timeline-grid {
-        height: 32px;
-        position: relative;
-        overflow: hidden;
-    }
+    height: 32px;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat({{ $totalDays }}, 1fr);
+}
+
+/* 🔥 THIS is the overlay that draws lines ABOVE everything */
+.timeline-grid::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10; /* ABOVE bar */
+
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent calc(100% / {{ $totalDays }} - 1px),
+        #000 calc(100% / {{ $totalDays }} - 1px),
+        #000 calc(100% / {{ $totalDays }})
+    );
+
+    pointer-events: none;
+}.timeline-grid {
+    height: 32px;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat({{ $totalDays }}, 1fr);
+}
+
+/* 🔥 THIS is the overlay that draws lines ABOVE everything */
+.timeline-grid::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10; /* ABOVE bar */
+
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent calc(100% / {{ $totalDays }} - 1px),
+        #000 calc(100% / {{ $totalDays }} - 1px),
+        #000 calc(100% / {{ $totalDays }})
+    );
+
+    pointer-events: none;
+}
 
     .day-bg {
-        border-right: 1px solid #000;
+        border-right: 1px solid #333;
         grid-row: 1;
+        position: relative;
+        z-index: 10;
+        pointer-events: none;
     }
 
     .booking-range {
-        height: 20px;
-        font-size: 12px;
+        height: 30px;
+        font-size: 16px;
         line-height: 20px;
         text-align: center;
-        margin: 6px 1px;
-        z-index: 5;
+        margin: 0;
         position: relative;
+        z-index: 2; /* below grid overlay */
         white-space: nowrap;
         overflow: hidden;
+        grid-row: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .booking-bar {
@@ -274,9 +329,9 @@
 
                         <td>
                             <div class="timeline-grid">
-                                @foreach($days as $day)
+                                {{-- @foreach($days as $day)
                                     <div class="day-bg"></div>
-                                @endforeach
+                                @endforeach --}}
 
                                 @if(count($row['ranges']) > 0)
                                     @php
@@ -286,7 +341,7 @@
 
                                     <div class="booking-range booking-bar"
                                         style="grid-column: {{ $startDay }} / {{ $endDay + 1 }};">
-                                        {{ $row['usagePercent'] }}%
+                                        {{ round($row['usagePercent']) }}%
                                     </div>
                                 @endif
                             </div>
