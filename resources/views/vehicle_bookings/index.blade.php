@@ -353,13 +353,9 @@
             </button>
         </div>
         <div class="d-flex gap-2 w-35">
-            <input type="text" id="reg-filter" class="form-control"
-                placeholder="Search by Reg No, Make , Model">
-
-            <input type="text" id="booking-filter" class="form-control"
-                placeholder="Search by Booking No">
+            <input type="text" id="reg-filter" class="form-control" placeholder="Search by Reg No, Make , Model">
+            <input type="text" id="booking-filter" class="form-control" placeholder="Search by Booking No">
         </div>
-
     </div>
 
     <div class="card shadow-sm">
@@ -383,8 +379,6 @@
                 <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#transportServiceModal" data-type="shuttle" {{ $canManage ? '' : 'disabled' }} >
                     🚐 Shuttle
                 </button>
-
-                
             </div>
 
             <div class="month-nav">
@@ -601,37 +595,26 @@
                 </div>
 
                 <div class="tab-pane fade" id="available-tab-pane" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Available Vehicles</h5>
+                    </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0">Available Vehicles</h5>
-    </div>
+                    <!-- Date Filter -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Date</label>
+                        <input type="date" id="availableVehicleDate" class="form-control w-25" value="{{ now()->format('Y-m-d') }}">
+                    </div>
 
-    <!-- Date Filter -->
-    <div class="mb-3">
-        <label class="form-label fw-bold">Select Date</label>
-        <input type="date"
-       id="availableVehicleDate"
-       class="form-control w-25"
-       value="{{ now()->format('Y-m-d') }}">
-    </div>
-
-    <!-- Results -->
-    <div id="availableVehiclesContent">
-        <div class="text-muted text-center">
-            Select a date to view available vehicles
-        </div>
-    </div>
-
-</div>
+                    <!-- Results -->
+                    <div id="availableVehiclesContent">
+                        <div class="text-muted text-center">
+                            Select a date to view available vehicles
+                        </div>
+                    </div>
+                </div>
 
                 {{-- Shuttle Services Tab --}}
-               <div
-                    class="tab-pane fade"
-                    id="shuttle-tab-pane"
-                    role="tabpanel"
-                    aria-labelledby="shuttle-tab"
-                    tabindex="0"
-                >
+               <div class="tab-pane fade" id="shuttle-tab-pane" role="tabpanel" aria-labelledby="shuttle-tab" tabindex="0" >
                     @php
                         $dept = strtolower(trim(auth()->user()->department ?? ''));
                         $isAdmin = strtolower(trim(auth()->user()->name ?? '')) === 'admin';
@@ -642,12 +625,7 @@
                         <h5 class="fw-bold mb-0">Shuttle Services</h5>
 
                         @if($canManageShuttle)
-                            <button
-                                class="btn btn-sm btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#transportServiceModal"
-                                data-type="shuttle"
-                            >
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#transportServiceModal" data-type="shuttle" >
                                 🚐 Add Shuttle
                             </button>
                         @endif
@@ -895,37 +873,36 @@
                 });
         });
 
+        document.addEventListener('click', function(e) {
+            const cell = e.target.closest('.booking-cell');
 
-document.addEventListener('click', function(e) {
-    const cell = e.target.closest('.booking-cell');
+            if (!cell) return;
+            if (!cell.dataset.bookingId) return;
 
-    if (!cell) return;
-    if (!cell.dataset.bookingId) return;
+            document.getElementById('modalBookingId').value = cell.dataset.bookingId;
 
-    document.getElementById('modalBookingId').value = cell.dataset.bookingId;
+            document.getElementById('modalBookingId').dataset.departureDate =
+                cell.dataset.departureDate || '';
+        });
 
-    document.getElementById('modalBookingId').dataset.departureDate =
-        cell.dataset.departureDate || '';
-});
+        document.getElementById('editDepartureTimeModal')
+        .addEventListener('show.bs.modal', function () {
 
-document.getElementById('editDepartureTimeModal')
-.addEventListener('show.bs.modal', function () {
+            const bookingInput = document.getElementById('modalBookingId');
 
-    const bookingInput = document.getElementById('modalBookingId');
+            const bookingId = bookingInput.value;
+            const departureDate = bookingInput.dataset.departureDate || '';
 
-    const bookingId = bookingInput.value;
-    const departureDate = bookingInput.dataset.departureDate || '';
+            document.getElementById('editDepartureTimeForm').action =
+                `/rentals/${bookingId}/departure-time`;
 
-    document.getElementById('editDepartureTimeForm').action =
-        `/rentals/${bookingId}/departure-time`;
+            document.getElementById('currentDepartureDisplay').value = departureDate;
 
-    document.getElementById('currentDepartureDisplay').value = departureDate;
-
-    if (departureDate.includes(' ')) {
-        document.getElementById('departure_time').value =
-            departureDate.split(' ')[1];
-    }
-});
+            if (departureDate.includes(' ')) {
+                document.getElementById('departure_time').value =
+                    departureDate.split(' ')[1];
+            }
+        });
     </script>
 
     <script>
