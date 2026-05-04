@@ -880,9 +880,7 @@
             if (!cell.dataset.bookingId) return;
 
             document.getElementById('modalBookingId').value = cell.dataset.bookingId;
-
-            document.getElementById('modalBookingId').dataset.departureDate =
-                cell.dataset.departureDate || '';
+            document.getElementById('modalBookingId').dataset.departureDate = cell.dataset.departureDate || '';
         });
 
         document.getElementById('editDepartureTimeModal')
@@ -980,15 +978,14 @@
                 });
 
                 var extendFreezeModal = document.getElementById('extendFreezeModal');
-                    extendFreezeModal.addEventListener('show.bs.modal', function (event) {
-                        var button = event.relatedTarget;
-                        var freezeId = button.getAttribute('data-freeze-id');
-                        var endDate = button.getAttribute('data-end-date');
+                extendFreezeModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var freezeId = button.getAttribute('data-freeze-id');
+                    var endDate = button.getAttribute('data-end-date');
 
-                        document.getElementById('modal_freeze_id').value = freezeId;
-                        document.getElementById('modal_end_date').value = endDate ?? '';
-                    });
-
+                    document.getElementById('modal_freeze_id').value = freezeId;
+                    document.getElementById('modal_end_date').value = endDate ?? '';
+                });
             });
 
             const typeWrappers = document.querySelectorAll('.type-wrapper');
@@ -1282,7 +1279,6 @@
         };
     </script>
 
-    
     <script>
         function unfreezeVehicle(freezeId) {
             if (!confirm('Are you sure you want to unfreeze this vehicle?')) return;
