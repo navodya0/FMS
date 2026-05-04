@@ -275,7 +275,7 @@
     height: 14px;
 
     border-radius: 50%;
-    border: 1.5px solid #000; /* 👈 border added */
+    border: 1.5px solid #000;
 
     margin-right: 5px;
     vertical-align: middle;
@@ -296,7 +296,7 @@
     color: #fff;
 }
 
-/* Tick */
+
 .cross-indicator::before {
     content: "✔";
 }
