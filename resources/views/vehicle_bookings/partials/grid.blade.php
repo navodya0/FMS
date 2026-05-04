@@ -9,12 +9,15 @@
         <div class="fw-bold"><span class="legend-box past-date"></span> Underutilized</div>
         <div class="fw-bold"><span class="legend-box vehicle-frozen-date"></span> Frozen Date</div>
         <div class="fw-bold"><span class="legend-box alternative-range"></span> Alternative Vehicle</div>
-        <div class="fw-bold">
-            <span class="legend-box sr-elite-booking"></span> SR → Elite Booking
-        </div>
-        <div class="fw-bold">
-            <span class="legend-box elite-sr-booking"></span> Elite → SR Booking
-        </div>
+    <div class="fw-bold d-flex align-items-center">
+    <span class="cross-indicator indicator-sr-elite me-1"></span>
+    SR → Elite Booking
+</div>
+
+<div class="fw-bold d-flex align-items-center">
+    <span class="cross-indicator indicator-elite-sr me-1"></span>
+    Elite → SR Booking
+</div>
     </div>
 </div>  
 
@@ -259,32 +262,32 @@
                                 $cellClass = 'future-booking';
                                 $canOpenModal = true;
                             }
+                                $srCompanies = [1, 2, 4, 5];
+                                $eliteCompanies = [3, 6];
 
-                            $srCompanies = [1, 2, 4, 5];
-                            $eliteCompanies = [3, 6];
+                                $srUserIds = [66, 36]; // you earlier said 66 and 36
+                                $eliteUserIds = [75];
 
-                            $srUserIds = [66, 38];
-                            $eliteUserIds = [75];
+                                $vehicleIsSr = in_array($vehicle->company_id, $srCompanies);
+                                $vehicleIsElite = in_array($vehicle->company_id, $eliteCompanies);
 
-                            $vehicleIsSr = in_array($vehicle->company_id, $srCompanies);
-                            $vehicleIsElite = in_array($vehicle->company_id, $eliteCompanies);
+                                $creatorId =
+                                    data_get($booking, 'creator.causer.id')
+                                    ?? data_get($booking, 'creator_id')
+                                    ?? data_get($booking, 'user_id');
 
-                            $creatorId =
-                                data_get($booking, 'creator.causer.id')
-                                ?? data_get($booking, 'creator_id')
-                                ?? data_get($booking, 'user_id');
+                                $creatorIsSr = in_array((int) $creatorId, $srUserIds);
+                                $creatorIsElite = in_array((int) $creatorId, $eliteUserIds);
 
-                            $creatorIsSr = in_array((int) $creatorId, $srUserIds);
-                            $creatorIsElite = in_array((int) $creatorId, $eliteUserIds);
+                                $indicatorClass = '';
 
-                            /* 🎯 Apply different colors */
-                            if ($vehicleIsSr && $creatorIsElite) {
-                                $cellClass .= ' sr-elite-booking';   // purple
-                            }
+                                if ($vehicleIsSr && $creatorIsElite) {
+                                    $indicatorClass = 'indicator-sr-elite';
+                                }
 
-                            if ($vehicleIsElite && $creatorIsSr) {
-                                $cellClass .= ' elite-sr-booking';   // gray
-                            }
+                                if ($vehicleIsElite && $creatorIsSr) {
+                                    $indicatorClass = 'indicator-elite-sr';
+                                }
 
                             $bookingNumber = strtoupper($booking->booking_number ?? '');
 
@@ -348,7 +351,12 @@
                         )'
                         data-bs-html="true"
                         title="{{ $tooltipHtml }}">
-                        <span class="booking-number">{{ $booking->booking_number }}</span>
+                        <span class="booking-number">
+    @if($indicatorClass)
+        <span class="cross-indicator {{ $indicatorClass }}"></span>
+    @endif
+    {{ $booking->booking_number }}
+</span>
                     </td>
 
                         @php $currentDay += $colspan; @endphp

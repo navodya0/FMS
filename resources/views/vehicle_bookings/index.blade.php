@@ -266,22 +266,39 @@
     overflow-x: hidden;
 }
 
-.sr-elite-booking {
-    background: #6f42c1 !important; /* purple */
-    color: #fff !important;
-    border: 2px solid #000 !important;
+.cross-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 14px;
+    height: 14px;
+
+    border-radius: 50%;
+    border: 1.5px solid #000; /* 👈 border added */
+
+    margin-right: 5px;
+    vertical-align: middle;
+
+    font-size: 10px;
+    font-weight: bold;
 }
 
-.elite-sr-booking {
-    background: #6c757d !important; /* gray */
-    color: #fff !important;
-    border: 2px solid #000 !important;
+/* Purple background */
+.indicator-sr-elite {
+    background: #6f42c1;
+    color: #fff;
 }
 
-.sr-elite-booking .booking-number,
-.elite-sr-booking .booking-number {
-    color: #fff !important;
-    font-weight: 800;
+/* Gray background */
+.indicator-elite-sr {
+    background: #6c757d;
+    color: #fff;
+}
+
+/* Tick */
+.cross-indicator::before {
+    content: "✔";
 }
 </style>
 

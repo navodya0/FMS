@@ -22,7 +22,10 @@ class VehicleUtilizationController extends Controller
 
         if ($request->filled('date')) {
             $from = Carbon::parse($request->date)->startOfDay();
-            $to = Carbon::parse($request->date)->startOfDay();
+            $to = $from->copy();
+        } elseif ($request->filled('from') && !$request->filled('to')) {
+            $from = Carbon::parse($request->from)->startOfDay();
+            $to = $from->copy();
         } else {
             $from = Carbon::parse($request->get('from', now()->startOfMonth()))->startOfDay();
             $to = Carbon::parse($request->get('to', now()->endOfMonth()))->startOfDay();
