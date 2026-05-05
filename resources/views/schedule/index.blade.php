@@ -46,7 +46,7 @@
                         <th>Type</th>
                         <th>Vehicle</th>
                         <th>Start</th>
-                        <th>End</th>
+                        {{-- <th>End</th> --}}
                         <th>Pickup</th>
                         <th>Dropoff</th>
                         <th class="text-end">Action</th>
@@ -70,11 +70,11 @@
                             <td class="text-capitalize">{{ $ts->type }}</td>
                             <td>{{ $ts->vehicle->reg_no ?? '-' }}</td>
                             <td>{{ optional($ts->assigned_start_at)->format('Y-m-d H:i') }}</td>
-                            <td>{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d H:i') : '-' }}</td>
+                            {{-- <td>{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d H:i') : '-' }}</td> --}}
                             <td>{{ $ts->pickup_location }}</td>
                             <td>{{ $ts->dropoff_location }}</td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-warning {{ $canEditRow ? '' : 'disabled' }}"
+                                {{-- <button class="btn btn-sm btn-warning {{ $canEditRow ? '' : 'disabled' }}"
                                     @if($canEditRow)
                                         data-bs-toggle="modal"
                                         data-bs-target="#editTransportServiceModal"
@@ -96,7 +96,7 @@
                                     @endif
                                 >
                                     <i class="bi bi-pencil-square"></i>
-                                </button>
+                                </button> --}}
 
                                 <button
                                     class="btn btn-sm btn-danger {{ $canEditRow ? '' : 'disabled' }}"
@@ -202,7 +202,7 @@
                                         <th>Select</th>
                                         <th>Booking No</th>
                                         <th>Assigned Start</th>
-                                        <th>Assigned End</th>
+                                        {{-- <th>Assigned End</th> --}}
                                         <th class="text-center" style="width: 90px;">No Vehicle</th>
                                         <th>Vehicle</th>
                                         <th>Chauffer</th>
@@ -234,11 +234,11 @@
                                                     required>
                                             </td>
 
-                                            <td>
+                                            {{-- <td>
                                                 <input type="datetime-local"
                                                     class="form-control transfer-end transfer-field"
                                                     name="transfer_items[{{ $i }}][assigned_end_at]">
-                                            </td>
+                                            </td> --}}
 
                                             <td class="text-center">
                                                 <input type="hidden"
@@ -367,10 +367,10 @@
                         <input class="form-control" type="datetime-local" name="assigned_start_at" id="edit_start" required>
                     </div>
 
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
                         <label class="form-label">Assigned End</label>
                         <input class="form-control" type="datetime-local" name="assigned_end_at" id="edit_end">
-                    </div>
+                    </div> --}}
 
                    <div class="col-md-6">
                         <label class="form-label">Pickup<span class="text-danger">*</span></label>

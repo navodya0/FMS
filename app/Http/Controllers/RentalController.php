@@ -627,6 +627,4 @@ class RentalController extends Controller
 
         return back()->with('success', 'Departure time updated successfully.');
     }
-
-
 }

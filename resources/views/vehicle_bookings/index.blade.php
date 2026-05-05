@@ -220,86 +220,86 @@
         color: #fff;
     }
 
-.available-today-floating {
-    position: absolute;
-    right: 2rem;
-    top: 74px;
-    width: calc(50% - 45px);
-    height: 188px;
-    z-index: 5;
-}
+    .available-today-floating {
+        position: absolute;
+        right: 2rem;
+        top: 74px;
+        width: calc(50% - 45px);
+        height: 188px;
+        z-index: 5;
+    }
 
-.available-today-floating .card-header {
-    padding: 12px 16px;
-    font-weight: 700;
-}
+    .available-today-floating .card-header {
+        padding: 12px 16px;
+        font-weight: 700;
+    }
 
-.available-today-floating .card-body {
-    height: 143px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 10px 12px !important;
-}
+    .available-today-floating .card-body {
+        height: 143px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 10px 12px !important;
+    }
 
-.available-today-floating .badge {
-    font-size: 11px;
-}
+    .available-today-floating .badge {
+        font-size: 11px;
+    }
 
-.available-today-floating .border {
-    padding: 3px 7px !important;
-    font-size: 12px;
-}
+    .available-today-floating .border {
+        padding: 3px 7px !important;
+        font-size: 12px;
+    }
 
-.vehicle-types-card {
-    height: 156px; /* match Available Today */
-}
+    .vehicle-types-card {
+        height: 156px; /* match Available Today */
+    }
 
-.vehicle-types-card .card-header {
-    height: 45px;
-    display: flex;
-    align-items: center;
-}
+    .vehicle-types-card .card-header {
+        height: 45px;
+        display: flex;
+        align-items: center;
+    }
 
-.vehicle-types-card .card-body {
-    height: calc(188px - 45px);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
+    .vehicle-types-card .card-body {
+        height: calc(188px - 45px);
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 
-.cross-indicator {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    .cross-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
 
-    width: 14px;
-    height: 14px;
+        width: 14px;
+        height: 14px;
 
-    border-radius: 50%;
-    border: 1.5px solid #000;
+        border-radius: 50%;
+        border: 1.5px solid #000;
 
-    margin-right: 5px;
-    vertical-align: middle;
+        margin-right: 5px;
+        vertical-align: middle;
 
-    font-size: 10px;
-    font-weight: bold;
-}
+        font-size: 10px;
+        font-weight: bold;
+    }
 
-/* Purple background */
-.indicator-sr-elite {
-    background: #6f42c1;
-    color: #fff;
-}
+    /* Purple background */
+    .indicator-sr-elite {
+        background: #6f42c1;
+        color: #fff;
+    }
 
-/* Gray background */
-.indicator-elite-sr {
-    background: #6c757d;
-    color: #fff;
-}
+    /* Gray background */
+    .indicator-elite-sr {
+        background: #6c757d;
+        color: #fff;
+    }
 
 
-.cross-indicator::before {
-    content: "✔";
-}
+    .cross-indicator::before {
+        content: "✔";
+    }
 </style>
 
 <div class="container-fluid">
@@ -1121,22 +1121,25 @@
                             v.model?.toLowerCase().includes(query)
                         ) || vehicles[0];
 
+                    
+                        if (v.status === 'disabled' || v.status === 0) {
+                            alert('This vehicle is disabled');
+                            return;
+                        }
+
                         selectedTypeId = v.vehicle_type_id;
                         selectedCategoryId = null;
 
-                        // Reset all type/category UI
                         document.querySelectorAll('.type-item').forEach(t => t.classList.remove('active-type'));
                         document.querySelectorAll('.categories-container').forEach(c => c.style.display = 'none');
                         document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active-type'));
 
-                        // Activate correct type
                         const typeWrapper = document.querySelector(`.type-wrapper[data-id="${v.vehicle_type_id}"]`);
                         if (typeWrapper) {
                             typeWrapper.querySelector('.categories-container').style.display = 'block';
                             typeWrapper.querySelector('.type-item').classList.add('active-type');
                         }
 
-                        // Render booking grid **for the current month only**
                         renderBookingGrid(selectedTypeId, selectedCategoryId);
                     });
             }
