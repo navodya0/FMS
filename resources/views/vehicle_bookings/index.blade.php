@@ -8,13 +8,31 @@
     .active-type { background:#0d6efd!important; color:white!important; }
 
     .booking-table-container { overflow-x:auto; }
-    .booking-table { border-collapse:collapse; width:100%; min-width:max-content; }
-    .booking-table th, .booking-table td {
-        border:1px solid #0000008c; padding:5px; text-align:center; white-space:nowrap; font-size:12px;
+
+    .booking-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        min-width:max-content;
     }
+
+    .booking-table th,
+    .booking-table td {
+        border:1px solid #0000008c;
+        padding:5px;
+        text-align:center;
+        white-space:nowrap;
+        font-size:12px;
+    }
+
     .booking-table th { background:#f2f2f2; }
-    .booked { background:#08c1f9ff; color:#fff; border : 2px solid black !important; }    
-        
+
+    .booked {
+        background:#08c1f9ff;
+        color:#fff;
+        border : 2px solid black !important;
+    }
+
     .current-booking {
         background: #f0e373;
         color: #000;
@@ -27,8 +45,8 @@
     }
 
     .vehicle-frozen-date {
-        background: #000 !important; 
-        color: #fff !important;      
+        background: #000 !important;
+        color: #fff !important;
         text-align: center;
         vertical-align: middle;
     }
@@ -42,19 +60,24 @@
     }
 
     td.past-booking {
-        background: #08c1f9ff; 
-        color: #fff; 
+        background: #08c1f9ff;
+        color: #fff;
         border: 2px solid black !important;
     }
 
     .future-booking {
-        background: #ed8a82 !important;
-        color: #fff;
+        background:#ed8a82 !important;
+        color:#fff;
         border : 2px solid black !important;
     }
 
-    .month-nav { display:flex; align-items:center; gap:10px; }
-        body.hide-sidebar .sidebar {
+    .month-nav {
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+
+    body.hide-sidebar .sidebar {
         display: none !important;
     }
 
@@ -83,7 +106,7 @@
     .vehicle-frozen .btn {
         display: none;
     }
-    
+
     .legend-box {
         display:inline-block;
         width:15px;
@@ -100,9 +123,21 @@
     }
 
     .booked.legend-box { background:#08c1f9ff; }
-    .current-booking.legend-box { background:#f0e373; border: 2px solid transparent !important;  }
-    .past-booking.legend-box { background:#08c1f9ff; border: 2px solid transparent; }
-    .future-booking.legend-box { background:#ed8a82; border: 2px solid transparent !important;  }
+
+    .current-booking.legend-box {
+        background:#f0e373;
+        border: 2px solid transparent !important;
+    }
+
+    .past-booking.legend-box {
+        background:#08c1f9ff;
+        border: 2px solid transparent;
+    }
+
+    .future-booking.legend-box {
+        background:#ed8a82;
+        border: 2px solid transparent !important;
+    }
 
     .alternative-range {
         background: repeating-linear-gradient(
@@ -113,17 +148,19 @@
             #e0e0e0 12px
         );
         color: #07111a;
-        border: 2px dashed #2a5179; 
-        border-radius: 6px;          
-        padding: 6px;               
+        border: 2px dashed #2a5179;
+        border-radius: 6px;
+        padding: 6px;
     }
+
     .arrived-booking {
-        background-color: #b2f2bb; 
+        background-color: #b2f2bb;
         color: #000;
         font-weight: bold;
     }
+
     .arrived-with-inspection {
-        background-color: #dac6dc; 
+        background-color: #dac6dc;
         color: #000;
         font-weight: bold;
     }
@@ -135,13 +172,6 @@
         position: relative;
     }
 
-    .booking-table{
-        border-collapse: separate;
-        border-spacing: 0;
-        width: 100%;
-        min-width: max-content;
-    }
-
     /* sticky header */
     .booking-table thead th{
         position: sticky;
@@ -151,72 +181,67 @@
     }
 
     .booking-table thead tr:nth-child(2) th{
-        top: 29px; 
+        top: 29px;
         z-index: 21;
         background: #f2f2f2;
+        width:34px;
+        min-width:34px;
+        max-width:34px;
     }
 
+    /* =========================================
+       UPDATED STICKY COLUMNS
+       ========================================= */
+
+    /* REG NO */
     .booking-table thead tr:first-child th:nth-child(1),
     .booking-table tbody td:nth-child(1){
-            min-width: 80px;
-    max-width: 100px;
-    }
+        min-width: 100px;
+        max-width: 100px;
+        width: 100px;
 
-    .booking-table thead tr:first-child th:nth-child(2),
-    .booking-table tbody td:nth-child(2){
-            min-width: 80px;
-    max-width: 100px;
-    }
-
-    .booking-table thead tr:first-child th:nth-child(3),
-    .booking-table tbody td:nth-child(3){
-           min-width: 80px;
-    max-width: 100px;
-    }
-
-
-
-
-
-    
-
-    .booking-table thead tr:nth-child(2) th{
-        width:34px; min-width:34px; max-width:34px;
-    }
-
-    .booking-table thead tr:first-child th:nth-child(1),
-    .booking-table tbody td:nth-child(1){
         position: sticky;
         left: 0;
-        z-index: 30;
+        z-index: 35;
         background: #fff;
     }
 
+    /* MAKE & MODEL */
     .booking-table thead tr:first-child th:nth-child(2),
     .booking-table tbody td:nth-child(2){
+        min-width: 160px;
+        max-width: 160px;
+        width: 160px;
+
         position: sticky;
-        /* left: 120px;  */
-        z-index: 30;
+        left: 100px;
+        z-index: 35;
         background: #fff;
     }
 
+    /* ACTION */
     .booking-table thead tr:first-child th:nth-child(3),
     .booking-table tbody td:nth-child(3){
+        min-width: 90px;
+        max-width: 90px;
+        width: 90px;
+
         position: sticky;
-        /* left: 340px;  */
-        z-index: 30;
+        left: 260px;
+        z-index: 35;
         background: #fff;
     }
 
+    /* sticky header cells */
     .booking-table thead tr:first-child th:nth-child(1),
     .booking-table thead tr:first-child th:nth-child(2),
     .booking-table thead tr:first-child th:nth-child(3){
         background: #f2f2f2;
-        z-index: 40;
+        z-index: 50;
     }
 
     .personal-booking {
-        background-color: #ffbf69  !important; 
+        background-color: #ffbf69 !important;
         color: #fff;
     }
 
@@ -251,7 +276,7 @@
     }
 
     .vehicle-types-card {
-        height: 156px; /* match Available Today */
+        height: 156px;
     }
 
     .vehicle-types-card .card-header {
@@ -284,18 +309,15 @@
         font-weight: bold;
     }
 
-    /* Purple background */
     .indicator-sr-elite {
         background: #6f42c1;
         color: #fff;
     }
 
-    /* Gray background */
     .indicator-elite-sr {
         background: #6c757d;
         color: #fff;
     }
-
 
     .cross-indicator::before {
         content: "✔";
