@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use App\Models\Rental;
+use Carbon\CarbonPeriod;
 use App\Models\VehicleFreeze;
 
 class VehicleFreezeController extends Controller
@@ -111,6 +112,37 @@ class VehicleFreezeController extends Controller
             ->log('Vehicle freeze extended');
 
         return redirect()->back()->with('success', 'Freeze extended successfully.');
+    }
+
+    public function bookedDates($vehicleId)
+    {
+        $rentals = Rental::where('vehicle_id', $vehicleId)
+            ->whereNotNull('arrival_date')
+            ->whereNotNull('departure_date')
+            ->get(['arrival_date', 'departure_date', 'booking_number']);
+
+        $disabledDates = [];
+        $bookedRanges = [];
+
+        foreach ($rentals as $rental) {
+            $start = \Carbon\Carbon::parse($rental->arrival_date)->format('Y-m-d');
+            $end   = \Carbon\Carbon::parse($rental->departure_date)->format('Y-m-d');
+
+            $bookedRanges[] = [
+                'from' => $start,
+                'to' => $end,
+                'booking_number' => $rental->booking_number,
+            ];
+
+            foreach (\Carbon\CarbonPeriod::create($start, $end) as $date) {
+                $disabledDates[] = $date->format('Y-m-d');
+            }
+        }
+
+        return response()->json([
+            'disabled_dates' => array_values(array_unique($disabledDates)),
+            'booked_ranges' => $bookedRanges,
+        ]);
     }
 
 }

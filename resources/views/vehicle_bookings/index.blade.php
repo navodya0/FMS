@@ -403,10 +403,18 @@
                 </button>
             </div>
 
-            <div class="month-nav">
-                <button id="prev-month" class="btn btn-sm btn-outline-primary">&lt; Prev</button>
-                <strong id="current-month"></strong>
-                <button id="next-month" class="btn btn-sm btn-outline-primary">Next &gt;</button>
+            <div class="month-nav d-flex gap-2">
+            
+                <select id="year-select"
+                    class="form-select form-select-sm"
+                    style="width:120px;">
+                </select>
+
+                <select id="month-select"
+                    class="form-select form-select-sm"
+                    style="width:160px;">
+                </select>
+
             </div>
         </div>
         <div class="card-body">
@@ -934,15 +942,95 @@
             let selectedCategoryId = null;
             let selectedCompany = '';
 
-            function renderBookingGrid(typeId, categoryId = null){
+
+            const monthSelect = document.getElementById('month-select');
+            const yearSelect = document.getElementById('year-select');
+
+            function initDateDropdowns() {
+
+                // ===== YEARS =====
+                yearSelect.innerHTML = '';
+
+                const currentYear = new Date().getFullYear();
+
+                for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+
+                    const option = document.createElement('option');
+
+                    option.value = y;
+                    option.textContent = y;
+
+                    if (y === currentDate.getFullYear()) {
+                        option.selected = true;
+                    }
+
+                    yearSelect.appendChild(option);
+                }
+
+                // ===== MONTHS =====
+                monthSelect.innerHTML = '';
+
+                for (let m = 0; m < 12; m++) {
+
+                    const option = document.createElement('option');
+
+                    option.value = m;
+
+                    option.textContent = new Date(2000, m, 1)
+                        .toLocaleString('default', {
+                            month: 'long'
+                        });
+
+                    if (m === currentDate.getMonth()) {
+                        option.selected = true;
+                    }
+
+                    monthSelect.appendChild(option);
+                }
+            }
+
+            initDateDropdowns();
+
+            function updateCalendarDate() {
+
+                currentDate = new Date(
+                    parseInt(yearSelect.value),
+                    parseInt(monthSelect.value),
+                    1
+                );
+
+                if (selectedTypeId) {
+                    renderBookingGrid(selectedTypeId, selectedCategoryId);
+                }
+            }
+
+            monthSelect.addEventListener('change', updateCalendarDate);
+            yearSelect.addEventListener('change', updateCalendarDate);
+
+            // initMonthDropdown();
+
+            // monthSelect.addEventListener('change', function () {
+            //     currentDate = new Date(
+            //         currentDate.getFullYear(),
+            //         parseInt(this.value),
+            //         1
+            //     );
+
+            //     if (selectedTypeId) {
+            //         renderBookingGrid(selectedTypeId, selectedCategoryId);
+            //     }
+            // });
+
+            function renderBookingGrid(typeId, categoryId = null) {
                 selectedTypeId = typeId;
                 selectedCategoryId = categoryId;
 
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth() + 1;
-                
+
                 function initTooltips() {
                     const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+
                     existingTooltips.forEach(el => {
                         const instance = bootstrap.Tooltip.getInstance(el);
                         if (instance) {
@@ -950,18 +1038,19 @@
                         }
                     });
 
-                    // Initialize new tooltips
-                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    const tooltipTriggerList = [].slice.call(
+                        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+                    );
+
                     tooltipTriggerList.forEach(el => {
                         new bootstrap.Tooltip(el, {
                             delay: { show: 100, hide: 100 },
-                            trigger: 'hover',  
+                            trigger: 'hover',
                             fallbackPlacement: 'auto',
                             boundary: 'viewport'
                         });
                     });
                 }
-
 
                 const url =
                     `/vehicles/${typeId}/booking-grid?year=${year}&month=${month}`
@@ -972,15 +1061,24 @@
                     .then(res => res.json())
                     .then(data => {
                         const bookingGrid = document.getElementById('booking-grid');
+
                         bookingGrid.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
                             const t = bootstrap.Tooltip.getInstance(el);
-                            if(t) t.dispose();
+                            if (t) t.dispose();
                         });
 
                         bookingGrid.innerHTML = data.html;
 
                         initTooltips();
-                        document.getElementById('current-month').innerText = data.monthName || '';
+
+                        if (monthSelect) {
+                            monthSelect.value = currentDate.getMonth();
+                        }
+
+                        if (yearSelect) {
+                            yearSelect.value = currentDate.getFullYear();
+                        }
+
                         filterVehicles();
                     });
             }
@@ -1049,31 +1147,6 @@
                     renderBookingGrid(wrapper.dataset.id);
                 }
             });
-
-            // Month navigation
-            document.getElementById('prev-month').onclick = function () {
-                currentDate = new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() - 1,
-                    1
-                );
-
-                if (selectedTypeId) {
-                    renderBookingGrid(selectedTypeId, selectedCategoryId);
-                }
-            };
-
-            document.getElementById('next-month').onclick = function () {
-                currentDate = new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() + 1,
-                    1
-                );
-
-                if (selectedTypeId) {
-                    renderBookingGrid(selectedTypeId, selectedCategoryId);
-                }
-            };
 
             function filterVehicles() {
                 const query = document.getElementById('reg-filter').value.toLowerCase().trim();
@@ -1184,12 +1257,20 @@
                         }
 
                         const v = vehicles[0]; // first match
-                        const rental = v.rentals[0];
+                       const rental = v.matched_rental || v.rentals?.[0];
 
-                        // Auto-jump to the month of the first booking (if exists)
                         if (rental?.arrival_date) {
-                            const d = new Date(rental.arrival_date);
+                            const d = new Date(rental.arrival_date.replace(' ', 'T'));
+
                             currentDate = new Date(d.getFullYear(), d.getMonth(), 1);
+
+                            if (monthSelect) {
+                                monthSelect.value = currentDate.getMonth();
+                            }
+
+                            if (yearSelect) {
+                                yearSelect.value = currentDate.getFullYear();
+                            }
                         }
 
                         // Auto-select correct type only (skip category)
@@ -1210,12 +1291,6 @@
                         renderBookingGrid(selectedTypeId, selectedCategoryId);
                     });
             }
-
-            // Debounce typing for booking search
-            document.getElementById('booking-filter')
-                .addEventListener('input', debounce(searchByBooking, 400));
-
-
 
             document.getElementById('booking-filter')
                 .addEventListener('input', debounce(searchByBooking, 400));

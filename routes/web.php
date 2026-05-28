@@ -328,6 +328,10 @@ Route::get('/vehicle-booking-calendar/export-csv', [VehicleBookingCalendarContro
 
     Route::get('/vehicles/available-by-date', [VehicleController::class, 'availableByDate'])
     ->name('vehicles.availableByDate');
+
+
+    Route::get('/vehicle-freezes/{vehicle}/booked-dates', [VehicleFreezeController::class, 'bookedDates'])
+    ->name('vehicle-freezes.booked-dates');
 });
 
 require __DIR__.'/auth.php';
