@@ -14,7 +14,7 @@ class HelpController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->hasRole(['admin', 'super_admin', 'it_admin'])) {
+        if ($user->email === 'it@explorevacations.lk') {
             $tickets = Ticket::with(['user', 'category', 'comments.user'])
                 ->orderByRaw("
                     CASE

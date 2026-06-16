@@ -5,9 +5,9 @@
 
     <h3 class="mb-4 fw-bold">IT Help Desk</h3>
 
-    @if(session('success'))
+    {{-- @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+    @endif --}}
 
     <div class="card mb-4">
         <div class="card-header fw-bold">Create New Ticket</div>
