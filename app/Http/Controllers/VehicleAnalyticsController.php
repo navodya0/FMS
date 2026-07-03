@@ -10,17 +10,16 @@ class VehicleAnalyticsController extends Controller
 {
     public function index()
     {
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-
-        $rentals = Rental::with(['vehicle.company'])
-            ->whereDate('arrival_date', '<=', $endOfMonth)
-            ->whereDate('departure_date', '>=', $startOfMonth)
-            ->orderBy('arrival_date')
-            ->get();
-
         $vehicles = Vehicle::with('company')
             ->where('status', '!=', 'disabled')
+            ->orderBy('reg_no')
+            ->get();
+
+        $rentals = Rental::with(['vehicle.company'])
+            ->whereNotNull('vehicle_id')
+            ->whereNotNull('arrival_date')
+            ->whereNotNull('departure_date')
+            ->orderBy('arrival_date')
             ->get();
 
         return view('vehicle-analytics.index', compact('rentals', 'vehicles'));

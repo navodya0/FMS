@@ -8,13 +8,31 @@
     .active-type { background:#0d6efd!important; color:white!important; }
 
     .booking-table-container { overflow-x:auto; }
-    .booking-table { border-collapse:collapse; width:100%; min-width:max-content; }
-    .booking-table th, .booking-table td {
-        border:1px solid #0000008c; padding:5px; text-align:center; white-space:nowrap; font-size:12px;
+
+    .booking-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        min-width:max-content;
     }
+
+    .booking-table th,
+    .booking-table td {
+        border:1px solid #0000008c;
+        padding:5px;
+        text-align:center;
+        white-space:nowrap;
+        font-size:12px;
+    }
+
     .booking-table th { background:#f2f2f2; }
-    .booked { background:#08c1f9ff; color:#fff; border : 2px solid black !important; }    
-        
+
+    .booked {
+        background:#08c1f9ff;
+        color:#fff;
+        border : 2px solid black !important;
+    }
+
     .current-booking {
         background: #f0e373;
         color: #000;
@@ -27,8 +45,8 @@
     }
 
     .vehicle-frozen-date {
-        background: #000 !important; 
-        color: #fff !important;      
+        background: #000 !important;
+        color: #fff !important;
         text-align: center;
         vertical-align: middle;
     }
@@ -42,19 +60,24 @@
     }
 
     td.past-booking {
-        background: #08c1f9ff; 
-        color: #fff; 
+        background: #08c1f9ff;
+        color: #fff;
         border: 2px solid black !important;
     }
 
     .future-booking {
-        background: #ed8a82 !important;
-        color: #fff;
+        background:#ed8a82 !important;
+        color:#fff;
         border : 2px solid black !important;
     }
 
-    .month-nav { display:flex; align-items:center; gap:10px; }
-        body.hide-sidebar .sidebar {
+    .month-nav {
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+
+    body.hide-sidebar .sidebar {
         display: none !important;
     }
 
@@ -83,7 +106,7 @@
     .vehicle-frozen .btn {
         display: none;
     }
-    
+
     .legend-box {
         display:inline-block;
         width:15px;
@@ -100,9 +123,21 @@
     }
 
     .booked.legend-box { background:#08c1f9ff; }
-    .current-booking.legend-box { background:#f0e373; border: 2px solid transparent !important;  }
-    .past-booking.legend-box { background:#08c1f9ff; border: 2px solid transparent; }
-    .future-booking.legend-box { background:#ed8a82; border: 2px solid transparent !important;  }
+
+    .current-booking.legend-box {
+        background:#f0e373;
+        border: 2px solid transparent !important;
+    }
+
+    .past-booking.legend-box {
+        background:#08c1f9ff;
+        border: 2px solid transparent;
+    }
+
+    .future-booking.legend-box {
+        background:#ed8a82;
+        border: 2px solid transparent !important;
+    }
 
     .alternative-range {
         background: repeating-linear-gradient(
@@ -113,17 +148,19 @@
             #e0e0e0 12px
         );
         color: #07111a;
-        border: 2px dashed #2a5179; 
-        border-radius: 6px;          
-        padding: 6px;               
+        border: 2px dashed #2a5179;
+        border-radius: 6px;
+        padding: 6px;
     }
+
     .arrived-booking {
-        background-color: #b2f2bb; 
+        background-color: #b2f2bb;
         color: #000;
         font-weight: bold;
     }
+
     .arrived-with-inspection {
-        background-color: #dac6dc; 
+        background-color: #dac6dc;
         color: #000;
         font-weight: bold;
     }
@@ -135,13 +172,6 @@
         position: relative;
     }
 
-    .booking-table{
-        border-collapse: separate;
-        border-spacing: 0;
-        width: 100%;
-        min-width: max-content;
-    }
-
     /* sticky header */
     .booking-table thead th{
         position: sticky;
@@ -151,59 +181,146 @@
     }
 
     .booking-table thead tr:nth-child(2) th{
-        top: 29px; 
+        top: 29px;
         z-index: 21;
         background: #f2f2f2;
+        width:34px;
+        min-width:34px;
+        max-width:34px;
     }
 
+    /* =========================================
+       UPDATED STICKY COLUMNS
+       ========================================= */
+
+    /* REG NO */
     .booking-table thead tr:first-child th:nth-child(1),
     .booking-table tbody td:nth-child(1){
-        width:120px; min-width:120px; max-width:120px;
-    }
+        min-width: 100px;
+        max-width: 100px;
+        width: 100px;
 
-    .booking-table thead tr:first-child th:nth-child(2),
-    .booking-table tbody td:nth-child(2){
-        width:220px; min-width:220px; max-width:220px;
-    }
-
-    .booking-table thead tr:first-child th:nth-child(3),
-    .booking-table tbody td:nth-child(3){
-        width:110px; min-width:110px; max-width:110px;
-    }
-
-    .booking-table thead tr:nth-child(2) th{
-        width:34px; min-width:34px; max-width:34px;
-    }
-
-    .booking-table thead tr:first-child th:nth-child(1),
-    .booking-table tbody td:nth-child(1){
         position: sticky;
         left: 0;
-        z-index: 30;
+        z-index: 35;
         background: #fff;
     }
 
+    /* MAKE & MODEL */
     .booking-table thead tr:first-child th:nth-child(2),
     .booking-table tbody td:nth-child(2){
+        min-width: 160px;
+        max-width: 160px;
+        width: 160px;
+
         position: sticky;
-        left: 120px; 
-        z-index: 30;
+        left: 100px;
+        z-index: 35;
         background: #fff;
     }
 
+    /* ACTION */
     .booking-table thead tr:first-child th:nth-child(3),
     .booking-table tbody td:nth-child(3){
+        min-width: 90px;
+        max-width: 90px;
+        width: 90px;
+
         position: sticky;
-        left: 340px; 
-        z-index: 30;
+        left: 260px;
+        z-index: 35;
         background: #fff;
     }
 
+    /* sticky header cells */
     .booking-table thead tr:first-child th:nth-child(1),
     .booking-table thead tr:first-child th:nth-child(2),
     .booking-table thead tr:first-child th:nth-child(3){
         background: #f2f2f2;
-        z-index: 40;
+        z-index: 50;
+    }
+
+    .personal-booking {
+        background-color: #ffbf69 !important;
+        color: #fff;
+    }
+
+    .available-today-floating {
+        position: absolute;
+        right: 2rem;
+        top: 74px;
+        width: calc(50% - 45px);
+        height: 188px;
+        z-index: 5;
+    }
+
+    .available-today-floating .card-header {
+        padding: 12px 16px;
+        font-weight: 700;
+    }
+
+    .available-today-floating .card-body {
+        height: 143px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 10px 12px !important;
+    }
+
+    .available-today-floating .badge {
+        font-size: 11px;
+    }
+
+    .available-today-floating .border {
+        padding: 3px 7px !important;
+        font-size: 12px;
+    }
+
+    .vehicle-types-card {
+        height: 156px;
+    }
+
+    .vehicle-types-card .card-header {
+        height: 45px;
+        display: flex;
+        align-items: center;
+    }
+
+    .vehicle-types-card .card-body {
+        height: calc(188px - 45px);
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .cross-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 14px;
+        height: 14px;
+
+        border-radius: 50%;
+        border: 1.5px solid #000;
+
+        margin-right: 5px;
+        vertical-align: middle;
+
+        font-size: 10px;
+        font-weight: bold;
+    }
+
+    .indicator-sr-elite {
+        background: #6f42c1;
+        color: #fff;
+    }
+
+    .indicator-elite-sr {
+        background: #6c757d;
+        color: #fff;
+    }
+
+    .cross-indicator::before {
+        content: "✔";
     }
 </style>
 
@@ -212,10 +329,10 @@
         <a href="{{ route('dashboard') }}" class="btn btn-outline-primary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
-        <h2 class="fw-bold text-center mb-0 flex-grow-1">Vehicle Bookings Calendar</h2>
+        <h2 class="fw-bold text-left ms-5 mb-0 flex-grow-1">Vehicle Bookings Calendar</h2>
     </div>
     <div class="d-flex justify-content-between align-items-end mb-2">
-        <div class="card shadow-sm w-50">
+        <div class="card shadow-sm w-50 vehicle-types-card">
             <div class="card-header fw-bold">Vehicle Types</div>
             <div class="card-body d-flex gap-2 flex-wrap" id="vehicle-types-container">
                 @foreach($types as $type)
@@ -234,6 +351,18 @@
                 @endforeach
             </div>
         </div>
+
+        <div class="available-today-floating">
+            <div class="card-header py-1 fw-bold d-flex justify-content-between">
+                <span>Available Today</span>
+                <small class="text-muted">{{ now()->format('Y-m-d') }}</small>
+            </div>
+
+            <div class="card-body p-2" id="availableTodayContent">
+                <div class="text-muted text-center small">Loading...</div>
+            </div>
+        </div>
+
         <div class="btn-group ms-2" id="company-filter">
             <button class="btn btn-sm btn-outline-secondary active" data-company="">
                 All
@@ -245,13 +374,9 @@
                 SR Rent A Car
             </button>
         </div>
-
         <div class="d-flex gap-2 w-35">
-            <input type="text" id="reg-filter" class="form-control"
-                placeholder="Search by Reg No, Make , Model">
-
-            <input type="text" id="booking-filter" class="form-control"
-                placeholder="Search by Booking No">
+            <input type="text" id="reg-filter" class="form-control" placeholder="Search by Reg No, Make , Model">
+            <input type="text" id="booking-filter" class="form-control" placeholder="Search by Booking No">
         </div>
     </div>
 
@@ -278,10 +403,18 @@
                 </button>
             </div>
 
-            <div class="month-nav">
-                <button id="prev-month" class="btn btn-sm btn-outline-primary">&lt; Prev</button>
-                <strong id="current-month"></strong>
-                <button id="next-month" class="btn btn-sm btn-outline-primary">Next &gt;</button>
+            <div class="month-nav d-flex gap-2">
+            
+                <select id="year-select"
+                    class="form-select form-select-sm"
+                    style="width:120px;">
+                </select>
+
+                <select id="month-select"
+                    class="form-select form-select-sm"
+                    style="width:160px;">
+                </select>
+
             </div>
         </div>
         <div class="card-body">
@@ -491,115 +624,123 @@
                     @endforeach
                 </div>
 
+                <div class="tab-pane fade" id="available-tab-pane" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Available Vehicles</h5>
+                    </div>
+
+                    <!-- Date Filter -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Date</label>
+                        <input type="date" id="availableVehicleDate" class="form-control w-25" value="{{ now()->format('Y-m-d') }}">
+                    </div>
+
+                    <!-- Results -->
+                    <div id="availableVehiclesContent">
+                        <div class="text-muted text-center">
+                            Select a date to view available vehicles
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Shuttle Services Tab --}}
-               <div
-    class="tab-pane fade"
-    id="shuttle-tab-pane"
-    role="tabpanel"
-    aria-labelledby="shuttle-tab"
-    tabindex="0"
->
-    @php
-        $dept = strtolower(trim(auth()->user()->department ?? ''));
-        $isAdmin = strtolower(trim(auth()->user()->name ?? '')) === 'admin';
-        $canManageShuttle = $isAdmin || $dept === 'rent a car department';
-    @endphp
+               <div class="tab-pane fade" id="shuttle-tab-pane" role="tabpanel" aria-labelledby="shuttle-tab" tabindex="0" >
+                    @php
+                        $dept = strtolower(trim(auth()->user()->department ?? ''));
+                        $isAdmin = strtolower(trim(auth()->user()->name ?? '')) === 'admin';
+                        $canManageShuttle = $isAdmin || $dept === 'rent a car department';
+                    @endphp
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0">Shuttle Services</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Shuttle Services</h5>
 
-        @if($canManageShuttle)
-            <button
-                class="btn btn-sm btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#transportServiceModal"
-                data-type="shuttle"
-            >
-                🚐 Add Shuttle
-            </button>
-        @endif
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-striped align-middle" id="shuttleServicesTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Vehicle</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Pickup</th>
-                        <th>Dropoff</th>
-                        <th>Passengers</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $count = 1; @endphp
-
-                    @foreach($transportServices as $ts)
-                        @if(strtolower(trim($ts->type)) === 'shuttle')
-                            @php
-                                $canEditRow = $isAdmin || $canManageShuttle;
-                            @endphp
-
-                            <tr>
-                                <td>{{ $count++ }}</td>
-                                <td>{{ $ts->vehicle->reg_no ?? '-' }}</td>
-                                <td>{{ optional($ts->assigned_start_at)->format('Y-m-d H:i') }}</td>
-                                <td>{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d H:i') : '-' }}</td>
-                                <td>{{ $ts->pickup_location }}</td>
-                                <td>{{ $ts->dropoff_location }}</td>
-                                <td>{{ $ts->passenger_count }}</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-warning {{ $canEditRow ? '' : 'disabled' }}"
-                                        @if($canEditRow)
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editTransportServiceModal"
-                                            data-id="{{ $ts->id }}"
-                                            data-type="{{ $ts->type }}"
-                                            data-vehicle_id="{{ $ts->vehicle_id }}"
-                                            data-chauffer_id="{{ $ts->chauffer_id }}"
-                                            data-start="{{ $ts->assigned_start_at ? $ts->assigned_start_at->format('Y-m-d\TH:i') : '' }}"
-                                            data-end="{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d\TH:i') : '' }}"
-                                            data-pickup="{{ $ts->pickup_location }}"
-                                            data-dropoff="{{ $ts->dropoff_location }}"
-                                            data-passengers="{{ $ts->passenger_count }}"
-                                            data-trip_code="{{ $ts->trip_code }}"
-                                            data-note="{{ $ts->note }}"
-                                        @else
-                                            type="button"
-                                            disabled
-                                            title="No permission for this type"
-                                        @endif
-                                    >
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-
-                                    <button
-                                        class="btn btn-sm btn-danger {{ $canEditRow ? '' : 'disabled' }}"
-                                        @if($canEditRow)
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteTransportServiceModal"
-                                            data-id="{{ $ts->id }}"
-                                        @else
-                                            type="button"
-                                            disabled
-                                            title="No permission for this type"
-                                        @endif
-                                    >
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                        @if($canManageShuttle)
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#transportServiceModal" data-type="shuttle" >
+                                🚐 Add Shuttle
+                            </button>
                         @endif
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-striped align-middle" id="shuttleServicesTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Vehicle</th>
+                                        <th>Start</th>
+                                        <th>End</th>
+                                        <th>Pickup</th>
+                                        <th>Dropoff</th>
+                                        <th>Passengers</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $count = 1; @endphp
+
+                                    @foreach($transportServices as $ts)
+                                        @if(strtolower(trim($ts->type)) === 'shuttle')
+                                            @php
+                                                $canEditRow = $isAdmin || $canManageShuttle;
+                                            @endphp
+
+                                            <tr>
+                                                <td>{{ $count++ }}</td>
+                                                <td>{{ $ts->vehicle->reg_no ?? '-' }}</td>
+                                                <td>{{ optional($ts->assigned_start_at)->format('Y-m-d H:i') }}</td>
+                                                <td>{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d H:i') : '-' }}</td>
+                                                <td>{{ $ts->pickup_location }}</td>
+                                                <td>{{ $ts->dropoff_location }}</td>
+                                                <td>{{ $ts->passenger_count }}</td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-sm btn-warning {{ $canEditRow ? '' : 'disabled' }}"
+                                                        @if($canEditRow)
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#editTransportServiceModal"
+                                                            data-id="{{ $ts->id }}"
+                                                            data-type="{{ $ts->type }}"
+                                                            data-vehicle_id="{{ $ts->vehicle_id }}"
+                                                            data-chauffer_id="{{ $ts->chauffer_id }}"
+                                                            data-start="{{ $ts->assigned_start_at ? $ts->assigned_start_at->format('Y-m-d\TH:i') : '' }}"
+                                                            data-end="{{ $ts->assigned_end_at ? $ts->assigned_end_at->format('Y-m-d\TH:i') : '' }}"
+                                                            data-pickup="{{ $ts->pickup_location }}"
+                                                            data-dropoff="{{ $ts->dropoff_location }}"
+                                                            data-passengers="{{ $ts->passenger_count }}"
+                                                            data-trip_code="{{ $ts->trip_code }}"
+                                                            data-note="{{ $ts->note }}"
+                                                        @else
+                                                            type="button"
+                                                            disabled
+                                                            title="No permission for this type"
+                                                        @endif
+                                                    >
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+
+                                                    <button
+                                                        class="btn btn-sm btn-danger {{ $canEditRow ? '' : 'disabled' }}"
+                                                        @if($canEditRow)
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#deleteTransportServiceModal"
+                                                            data-id="{{ $ts->id }}"
+                                                        @else
+                                                            type="button"
+                                                            disabled
+                                                            title="No permission for this type"
+                                                        @endif
+                                                    >
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
             <div class="modal fade" id="extendFreezeModal" tabindex="-1" aria-labelledby="extendFreezeModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -657,6 +798,50 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="editDepartureTimeModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <form method="POST" id="editDepartureTimeForm">
+                        @csrf
+                        @method('PATCH')
+
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Edit Departure Time</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Departure Date & Time</label>
+                                    <input type="text"
+                                        id="currentDepartureDisplay"
+                                        class="form-control"
+                                        readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">New Departure Time</label>
+                                    <input type="time"
+                                        name="departure_time"
+                                        id="departure_time"
+                                        class="form-control"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Save Time
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             {{-- Modals --}}
             @include('vehicle_freeze.partials.freeze-vehicle-modal')
             @include('vehicle_bookings.partials.booking-actions-modal')
@@ -672,36 +857,82 @@
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        function initShuttleTable() {
-            if (!$.fn.DataTable.isDataTable('#shuttleServicesTable')) {
-                $('#shuttleServicesTable').DataTable({
-                    responsive: true,
-                    pageLength: 10,
-                    order: [[2, 'desc']],
-                    columnDefs: [
-                        {
-                            targets: -1,
-                            orderable: false,
-                            searchable: false
-                        }
-                    ]
-                });
-            } else {
-                $('#shuttleServicesTable').DataTable().columns.adjust().responsive.recalc();
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function initShuttleTable() {
+                if (!$.fn.DataTable.isDataTable('#shuttleServicesTable')) {
+                    $('#shuttleServicesTable').DataTable({
+                        responsive: true,
+                        pageLength: 10,
+                        order: [[2, 'desc']],
+                        columnDefs: [
+                            {
+                                targets: -1,
+                                orderable: false,
+                                searchable: false
+                            }
+                        ]
+                    });
+                } else {
+                    $('#shuttleServicesTable').DataTable().columns.adjust().responsive.recalc();
+                }
             }
-        }
 
-        $('button[data-bs-target="#shuttle-tab-pane"]').on('shown.bs.tab', function () {
-            initShuttleTable();
+            $('button[data-bs-target="#shuttle-tab-pane"]').on('shown.bs.tab', function () {
+                initShuttleTable();
+            });
+
+            if ($('#shuttle-tab-pane').hasClass('show') || $('#shuttle-tab-pane').hasClass('active')) {
+                initShuttleTable();
+            }
         });
 
-        if ($('#shuttle-tab-pane').hasClass('show') || $('#shuttle-tab-pane').hasClass('active')) {
-            initShuttleTable();
-        }
-    });
-</script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const content = document.getElementById('availableTodayContent');
+            if (!content) return;
+
+            const today = new Date().toISOString().slice(0, 10);
+
+            fetch(`/vehicles/available-by-date?date=${today}`)
+                .then(res => res.json())
+                .then(data => {
+                    content.innerHTML = data.html;
+                })
+                .catch(() => {
+                    content.innerHTML = `<div class="text-danger text-center small">Failed to load vehicles</div>`;
+                });
+        });
+
+        document.addEventListener('click', function(e) {
+            const cell = e.target.closest('.booking-cell');
+
+            if (!cell) return;
+            if (!cell.dataset.bookingId) return;
+
+            document.getElementById('modalBookingId').value = cell.dataset.bookingId;
+            document.getElementById('modalBookingId').dataset.departureDate = cell.dataset.departureDate || '';
+        });
+
+        document.getElementById('editDepartureTimeModal')
+        .addEventListener('show.bs.modal', function () {
+
+            const bookingInput = document.getElementById('modalBookingId');
+
+            const bookingId = bookingInput.value;
+            const departureDate = bookingInput.dataset.departureDate || '';
+
+            document.getElementById('editDepartureTimeForm').action =
+                `/rentals/${bookingId}/departure-time`;
+
+            document.getElementById('currentDepartureDisplay').value = departureDate;
+
+            if (departureDate.includes(' ')) {
+                document.getElementById('departure_time').value =
+                    departureDate.split(' ')[1];
+            }
+        });
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function(){
             document.body.classList.add('hide-sidebar');
@@ -711,15 +942,95 @@
             let selectedCategoryId = null;
             let selectedCompany = '';
 
-            function renderBookingGrid(typeId, categoryId = null){
+
+            const monthSelect = document.getElementById('month-select');
+            const yearSelect = document.getElementById('year-select');
+
+            function initDateDropdowns() {
+
+                // ===== YEARS =====
+                yearSelect.innerHTML = '';
+
+                const currentYear = new Date().getFullYear();
+
+                for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+
+                    const option = document.createElement('option');
+
+                    option.value = y;
+                    option.textContent = y;
+
+                    if (y === currentDate.getFullYear()) {
+                        option.selected = true;
+                    }
+
+                    yearSelect.appendChild(option);
+                }
+
+                // ===== MONTHS =====
+                monthSelect.innerHTML = '';
+
+                for (let m = 0; m < 12; m++) {
+
+                    const option = document.createElement('option');
+
+                    option.value = m;
+
+                    option.textContent = new Date(2000, m, 1)
+                        .toLocaleString('default', {
+                            month: 'long'
+                        });
+
+                    if (m === currentDate.getMonth()) {
+                        option.selected = true;
+                    }
+
+                    monthSelect.appendChild(option);
+                }
+            }
+
+            initDateDropdowns();
+
+            function updateCalendarDate() {
+
+                currentDate = new Date(
+                    parseInt(yearSelect.value),
+                    parseInt(monthSelect.value),
+                    1
+                );
+
+                if (selectedTypeId) {
+                    renderBookingGrid(selectedTypeId, selectedCategoryId);
+                }
+            }
+
+            monthSelect.addEventListener('change', updateCalendarDate);
+            yearSelect.addEventListener('change', updateCalendarDate);
+
+            // initMonthDropdown();
+
+            // monthSelect.addEventListener('change', function () {
+            //     currentDate = new Date(
+            //         currentDate.getFullYear(),
+            //         parseInt(this.value),
+            //         1
+            //     );
+
+            //     if (selectedTypeId) {
+            //         renderBookingGrid(selectedTypeId, selectedCategoryId);
+            //     }
+            // });
+
+            function renderBookingGrid(typeId, categoryId = null) {
                 selectedTypeId = typeId;
                 selectedCategoryId = categoryId;
 
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth() + 1;
-                
+
                 function initTooltips() {
                     const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+
                     existingTooltips.forEach(el => {
                         const instance = bootstrap.Tooltip.getInstance(el);
                         if (instance) {
@@ -727,18 +1038,19 @@
                         }
                     });
 
-                    // Initialize new tooltips
-                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    const tooltipTriggerList = [].slice.call(
+                        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+                    );
+
                     tooltipTriggerList.forEach(el => {
                         new bootstrap.Tooltip(el, {
                             delay: { show: 100, hide: 100 },
-                            trigger: 'hover',  
+                            trigger: 'hover',
                             fallbackPlacement: 'auto',
                             boundary: 'viewport'
                         });
                     });
                 }
-
 
                 const url =
                     `/vehicles/${typeId}/booking-grid?year=${year}&month=${month}`
@@ -749,15 +1061,24 @@
                     .then(res => res.json())
                     .then(data => {
                         const bookingGrid = document.getElementById('booking-grid');
+
                         bookingGrid.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
                             const t = bootstrap.Tooltip.getInstance(el);
-                            if(t) t.dispose();
+                            if (t) t.dispose();
                         });
 
                         bookingGrid.innerHTML = data.html;
 
                         initTooltips();
-                        document.getElementById('current-month').innerText = data.monthName || '';
+
+                        if (monthSelect) {
+                            monthSelect.value = currentDate.getMonth();
+                        }
+
+                        if (yearSelect) {
+                            yearSelect.value = currentDate.getFullYear();
+                        }
+
                         filterVehicles();
                     });
             }
@@ -777,15 +1098,14 @@
                 });
 
                 var extendFreezeModal = document.getElementById('extendFreezeModal');
-                    extendFreezeModal.addEventListener('show.bs.modal', function (event) {
-                        var button = event.relatedTarget;
-                        var freezeId = button.getAttribute('data-freeze-id');
-                        var endDate = button.getAttribute('data-end-date');
+                extendFreezeModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var freezeId = button.getAttribute('data-freeze-id');
+                    var endDate = button.getAttribute('data-end-date');
 
-                        document.getElementById('modal_freeze_id').value = freezeId;
-                        document.getElementById('modal_end_date').value = endDate ?? '';
-                    });
-
+                    document.getElementById('modal_freeze_id').value = freezeId;
+                    document.getElementById('modal_end_date').value = endDate ?? '';
+                });
             });
 
             const typeWrappers = document.querySelectorAll('.type-wrapper');
@@ -827,31 +1147,6 @@
                     renderBookingGrid(wrapper.dataset.id);
                 }
             });
-
-            // Month navigation
-            document.getElementById('prev-month').onclick = function () {
-                currentDate = new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() - 1,
-                    1
-                );
-
-                if (selectedTypeId) {
-                    renderBookingGrid(selectedTypeId, selectedCategoryId);
-                }
-            };
-
-            document.getElementById('next-month').onclick = function () {
-                currentDate = new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() + 1,
-                    1
-                );
-
-                if (selectedTypeId) {
-                    renderBookingGrid(selectedTypeId, selectedCategoryId);
-                }
-            };
 
             function filterVehicles() {
                 const query = document.getElementById('reg-filter').value.toLowerCase().trim();
@@ -921,22 +1216,25 @@
                             v.model?.toLowerCase().includes(query)
                         ) || vehicles[0];
 
+                    
+                        if (v.status === 'disabled' || v.status === 0) {
+                            alert('This vehicle is disabled');
+                            return;
+                        }
+
                         selectedTypeId = v.vehicle_type_id;
                         selectedCategoryId = null;
 
-                        // Reset all type/category UI
                         document.querySelectorAll('.type-item').forEach(t => t.classList.remove('active-type'));
                         document.querySelectorAll('.categories-container').forEach(c => c.style.display = 'none');
                         document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active-type'));
 
-                        // Activate correct type
                         const typeWrapper = document.querySelector(`.type-wrapper[data-id="${v.vehicle_type_id}"]`);
                         if (typeWrapper) {
                             typeWrapper.querySelector('.categories-container').style.display = 'block';
                             typeWrapper.querySelector('.type-item').classList.add('active-type');
                         }
 
-                        // Render booking grid **for the current month only**
                         renderBookingGrid(selectedTypeId, selectedCategoryId);
                     });
             }
@@ -959,12 +1257,20 @@
                         }
 
                         const v = vehicles[0]; // first match
-                        const rental = v.rentals[0];
+                       const rental = v.matched_rental || v.rentals?.[0];
 
-                        // Auto-jump to the month of the first booking (if exists)
                         if (rental?.arrival_date) {
-                            const d = new Date(rental.arrival_date);
+                            const d = new Date(rental.arrival_date.replace(' ', 'T'));
+
                             currentDate = new Date(d.getFullYear(), d.getMonth(), 1);
+
+                            if (monthSelect) {
+                                monthSelect.value = currentDate.getMonth();
+                            }
+
+                            if (yearSelect) {
+                                yearSelect.value = currentDate.getFullYear();
+                            }
                         }
 
                         // Auto-select correct type only (skip category)
@@ -985,12 +1291,6 @@
                         renderBookingGrid(selectedTypeId, selectedCategoryId);
                     });
             }
-
-            // Debounce typing for booking search
-            document.getElementById('booking-filter')
-                .addEventListener('input', debounce(searchByBooking, 400));
-
-
 
             document.getElementById('booking-filter')
                 .addEventListener('input', debounce(searchByBooking, 400));

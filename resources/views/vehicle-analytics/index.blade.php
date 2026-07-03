@@ -23,22 +23,17 @@
             </thead>
 
             <tbody>
-                @foreach($rentals as $rental)
+                @foreach($vehicles as $vehicle)
                     <tr
-                        data-booking_no="{{ $rental->booking_number ?? '' }}"
-                        data-vehicle="{{ $rental->vehicle->reg_no ?? '' }}"
-                        data-company="{{ $rental->vehicle->company->name ?? '' }}"
-                        data-arrival="{{ $rental->arrival_date ?? '' }}"
-                        data-departure="{{ $rental->departure_date ?? '' }}"
-                        data-passengers="{{ $rental->passengers ?? '' }}"
-                        data-status="{{ $rental->status ?? '' }}"
-                        data-repair_type="{{ $rental->repair_type ?? '' }}"
+                        data-vehicle-id="{{ $vehicle->id }}"
+                        data-vehicle="{{ $vehicle->reg_no ?? '' }}"
+                        data-company="{{ $vehicle->company->name ?? '' }}"
                     >
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{ $rental->vehicle->reg_no ?? '-' }}</td>
-                        <td>{{ $rental->vehicle->company->name ?? '-' }}</td>
-                        <td class="used-days-cell">-</td>
-                        <td class="day-utilization-cell">-</td>
+                        <td>{{ $vehicle->reg_no ?? '-' }}</td>
+                        <td>{{ $vehicle->company->name ?? '-' }}</td>
+                        <td class="used-days-cell">0</td>
+                        <td class="day-utilization-cell">0.00%</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -46,15 +41,28 @@
     </div>
 </div>
 
+@php
+    $vehicleJson = $vehicles->map(function ($v) {
+        return [
+            'id' => $v->id,
+            'vehicle' => $v->reg_no ?? '',
+            'company' => $v->company->name ?? '',
+        ];
+    })->values();
+
+    $rentalJson = $rentals->map(function ($r) {
+        return [
+            'vehicle_id' => $r->vehicle_id,
+            'arrival_date' => $r->arrival_date ? \Carbon\Carbon::parse($r->arrival_date)->format('Y-m-d') : '',
+            'departure_date' => $r->departure_date ? \Carbon\Carbon::parse($r->departure_date)->format('Y-m-d') : '',
+            'status' => $r->status ?? '',
+        ];
+    })->values();
+@endphp
+
 <script>
-    window.allVehicles = @json(
-        $vehicles->map(function ($v) {
-            return [
-                'vehicle' => $v->reg_no ?? '',
-                'company' => $v->company->name ?? '',
-            ];
-        })->values()
-    );
+    window.allVehicles = @json($vehicleJson);
+    window.allRentals = @json($rentalJson);
 </script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -72,7 +80,7 @@ $(function () {
         order: [[3, 'desc']],
         language: {
             lengthMenu: "Show _MENU_ rows",
-            info: "Showing _START_ to _END_ of _TOTAL_ bookings",
+            info: "Showing _START_ to _END_ of _TOTAL_ vehicles",
             paginate: { previous: "Prev", next: "Next" }
         }
     });
@@ -122,7 +130,9 @@ $(function () {
                     ${monthOpts}
                 </select>
 
-                <button id="exportExcelBtn" class="btn btn-sm btn-primary" style="display:none;">Export Excel</button>
+                <button id="exportExcelBtn" class="btn btn-sm btn-primary" style="display:none;">
+                    Export Excel
+                </button>
             </div>
         `);
 
@@ -131,36 +141,20 @@ $(function () {
     $('#exportMonth').val(currentMonth).show();
     $('#exportExcelBtn').show();
 
+    fillCurrentMonthMetricsOnce();
+
     $(document).on('change', '#exportPeriod', function () {
         const period = this.value;
 
         $('#exportYear').toggle(!!period);
         $('#exportMonth').toggle(period === 'monthly');
-        $('#exportExcelBtn').toggle(!!period);
 
-        const year = $('#exportYear').val();
-        const month = $('#exportMonth').val();
-
-        let show = false;
-        if (period === 'yearly' && year) show = true;
-        if (period === 'monthly' && year && month) show = true;
-
-        $('#exportExcelBtn').toggle(show);
+        toggleExportButton();
     });
 
     $(document).on('change', '#exportYear, #exportMonth', function () {
-        const period = $('#exportPeriod').val();
-        const year = $('#exportYear').val();
-        const month = $('#exportMonth').val();
-
-        let show = false;
-        if (period === 'yearly' && year) show = true;
-        if (period === 'monthly' && year && month) show = true;
-
-        $('#exportExcelBtn').toggle(show);
+        toggleExportButton();
     });
-
-    fillCurrentMonthMetricsOnce();
 
     $(document).on('click', '#exportExcelBtn', function () {
         const period = $('#exportPeriod').val();
@@ -180,55 +174,29 @@ $(function () {
         const idxs = table.rows({ search: 'applied' }).indexes().toArray();
         const grouped = new Map();
 
-        (window.allVehicles || []).forEach(v => {
-            const vehicle = String(v.vehicle || '').trim();
-            const company = String(v.company || '').trim();
-
-            if (!vehicle) return;
-
-            const key = vehicle;
-
-            if (!grouped.has(key)) {
-                grouped.set(key, {
-                    label: buildPeriodLabel(period, selectedYear, selectedMonth),
-                    vehicle,
-                    company,
-                    usedDays: 0
-                });
-            }
-        });
-
         idxs.forEach(i => {
             const node = table.row(i).node();
             const d = node?.dataset || {};
 
+            const vehicleId = d.vehicleId;
             const vehicle = String(d.vehicle || '').trim();
             const company = String(d.company || '').trim();
-            const arrival = String(d.arrival || '').trim();
-            const departure = String(d.departure || '').trim();
 
-            if (!vehicle || !arrival || !departure) return;
+            if (!vehicleId || !vehicle) return;
 
-            const key = vehicle;
-
-            if (!grouped.has(key)) {
-                grouped.set(key, {
-                    label: buildPeriodLabel(period, selectedYear, selectedMonth),
-                    vehicle,
-                    company,
-                    usedDays: 0
-                });
-            }
-
-            const usedDays = calculateUsedDaysWithinSelectedPeriod(
-                arrival,
-                departure,
+            const usedDays = calculateVehicleUsedDays(
+                vehicleId,
                 period,
                 selectedYear,
                 selectedMonth
             );
 
-            grouped.get(key).usedDays += usedDays;
+            grouped.set(vehicleId, {
+                label: buildPeriodLabel(period, selectedYear, selectedMonth),
+                vehicle,
+                company,
+                usedDays
+            });
         });
 
         const totalDaysInPeriod = getTotalDaysInPeriod(period, selectedYear, selectedMonth);
@@ -238,17 +206,14 @@ $(function () {
                 ? ((item.usedDays / totalDaysInPeriod) * 100)
                 : 0;
 
-                const status = getUtilizationStatus(dayPctNum);
-
-                return {
-                    periodLabel: item.label,
-                    vehicle: item.vehicle,
-                    company: item.company,
-                    usedDays: item.usedDays,
-                    dayPct: dayPctNum.toFixed(2) + '%',
-                    status
-                };
-
+            return {
+                periodLabel: item.label,
+                vehicle: item.vehicle,
+                company: item.company,
+                usedDays: item.usedDays,
+                dayPct: dayPctNum.toFixed(2) + '%',
+                status: getUtilizationStatus(dayPctNum)
+            };
         }).sort((a, b) => {
             if (b.usedDays !== a.usedDays) return b.usedDays - a.usedDays;
             return a.vehicle.localeCompare(b.vehicle);
@@ -267,6 +232,24 @@ $(function () {
         });
     });
 
+    function toggleExportButton() {
+        const period = $('#exportPeriod').val();
+        const year = $('#exportYear').val();
+        const month = $('#exportMonth').val();
+
+        let show = false;
+
+        if (period === 'yearly' && year) {
+            show = true;
+        }
+
+        if (period === 'monthly' && year && month) {
+            show = true;
+        }
+
+        $('#exportExcelBtn').toggle(show);
+    }
+
     function fillCurrentMonthMetricsOnce() {
         const period = 'monthly';
         const year = currentYear;
@@ -277,12 +260,8 @@ $(function () {
             const node = this.node();
             const d = node?.dataset || {};
 
-            const arrival = String(d.arrival || '').trim();
-            const departure = String(d.departure || '').trim();
-
-            const usedDays = calculateUsedDaysWithinSelectedPeriod(
-                arrival,
-                departure,
+            const usedDays = calculateVehicleUsedDays(
+                d.vehicleId,
                 period,
                 year,
                 month
@@ -297,54 +276,33 @@ $(function () {
         });
     }
 
+    function calculateVehicleUsedDays(vehicleId, period, year, month) {
+        const usedDates = new Set();
 
-    
-    function collectYears() {
-        const years = new Set();
+        (window.allRentals || []).forEach(rental => {
+            if (String(rental.vehicle_id) !== String(vehicleId)) return;
 
-        table.rows().every(function () {
-            const node = this.node();
-            const d = node?.dataset || {};
+            const dates = getUsedDatesWithinSelectedPeriod(
+                rental.arrival_date,
+                rental.departure_date,
+                period,
+                year,
+                month
+            );
 
-            const arrivalParts = getDateParts(d.arrival || '');
-            const departureParts = getDateParts(d.departure || '');
-            const createdParts = getDateParts(d.created || '');
-
-            if (arrivalParts?.year) years.add(arrivalParts.year);
-            if (departureParts?.year) years.add(departureParts.year);
-            if (createdParts?.year) years.add(createdParts.year);
+            dates.forEach(date => usedDates.add(date));
         });
 
-        years.add(String(new Date().getFullYear()));
-        return [...years].sort((a, b) => Number(b) - Number(a));
+        return usedDates.size;
     }
 
-    function getDateParts(dt) {
-        const [datePart] = String(dt || '').split(' ');
-        const [year, month, day] = String(datePart || '').split('-');
-
-        if (!year || !month || !day) return null;
-        return { year, month, day };
-    }
-
-    function buildPeriodLabel(period, year, month) {
-        return period === 'monthly' ? `${monthName(month)} ${year}` : year;
-    }
-
-    function getTotalDaysInPeriod(period, year, month) {
-        if (period === 'monthly') {
-            return daysInMonth(Number(year), Number(month));
-        }
-        return isLeapYear(Number(year)) ? 366 : 365;
-    }
-
-    function calculateUsedDaysWithinSelectedPeriod(arrival, departure, period, year, month) {
-        if (!arrival || !departure) return 0;
+    function getUsedDatesWithinSelectedPeriod(arrival, departure, period, year, month) {
+        const dates = [];
 
         const start = toDateOnly(arrival);
         const end = toDateOnly(departure);
 
-        if (!start || !end) return 0;
+        if (!start || !end) return dates;
 
         let periodStart;
         let periodEnd;
@@ -360,17 +318,81 @@ $(function () {
         const overlapStart = start > periodStart ? start : periodStart;
         const overlapEnd = end < periodEnd ? end : periodEnd;
 
-        if (overlapEnd < overlapStart) return 0;
+        if (overlapEnd < overlapStart) return dates;
 
-        return Math.floor((overlapEnd - overlapStart) / 86400000) + 1;
+        let current = new Date(overlapStart);
+
+        while (current <= overlapEnd) {
+            dates.push(formatDateKey(current));
+            current.setDate(current.getDate() + 1);
+        }
+
+        return dates;
     }
 
     function toDateOnly(str) {
-        const raw = String(str).trim().replace(' ', 'T');
-        const d = new Date(raw);
+        const raw = String(str || '').trim();
+
+        if (!raw) return null;
+
+        const parts = raw.split('-');
+
+        if (parts.length < 3) return null;
+
+        const year = Number(parts[0]);
+        const month = Number(parts[1]) - 1;
+        const day = Number(parts[2]);
+
+        const d = new Date(year, month, day);
 
         if (isNaN(d.getTime())) return null;
-        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+        return d;
+    }
+
+    function formatDateKey(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+
+        return `${y}-${m}-${d}`;
+    }
+
+    function collectYears() {
+        const years = new Set();
+
+        (window.allRentals || []).forEach(rental => {
+            const arrivalParts = getDateParts(rental.arrival_date || '');
+            const departureParts = getDateParts(rental.departure_date || '');
+
+            if (arrivalParts?.year) years.add(arrivalParts.year);
+            if (departureParts?.year) years.add(departureParts.year);
+        });
+
+        years.add(String(new Date().getFullYear()));
+
+        return [...years].sort((a, b) => Number(b) - Number(a));
+    }
+
+    function getDateParts(dt) {
+        const [datePart] = String(dt || '').split(' ');
+        const [year, month, day] = String(datePart || '').split('-');
+
+        if (!year || !month || !day) return null;
+
+        return { year, month, day };
+    }
+
+    function buildPeriodLabel(period, year, month) {
+        return period === 'monthly' ? `${monthName(month)} ${year}` : year;
+    }
+
+    function getTotalDaysInPeriod(period, year, month) {
+        if (period === 'monthly') {
+            return daysInMonth(Number(year), Number(month));
+        }
+
+        return isLeapYear(Number(year)) ? 366 : 365;
     }
 
     function monthName(num) {
@@ -388,6 +410,7 @@ $(function () {
             '11': 'November',
             '12': 'December'
         };
+
         return m[num] || num;
     }
 
@@ -399,13 +422,20 @@ $(function () {
         return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
     }
 
+    function getUtilizationStatus(dayPctNum) {
+        if (dayPctNum === 0) return 'Not Utilized';
+        if (dayPctNum > 75) return 'Good';
+        if (dayPctNum >= 50) return 'Fair';
+        return 'Under Utilized';
+    }
+
     function exportVehicleAnalyticsExcel({ rows, periodLabel, totalDaysInPeriod, filename }) {
         const data = [
             ['Vehicle Utilization Analytics'],
             [`Period: ${periodLabel}`],
             [],
             ['Explanation'],
-            [`Used Days = Number of days the vehicle was utilized within ${periodLabel}.`],
+            [`Used Days = Number of unique days the vehicle was utilized within ${periodLabel}.`],
             [`Day Utilization % = (Vehicle Used Days / Total Days in ${periodLabel}) × 100.`],
             [`Total Days in Period = ${totalDaysInPeriod}`],
             [],
@@ -432,18 +462,6 @@ $(function () {
             { wch: 12 },
             { wch: 18 },
             { wch: 18 }
-        ];
-
-        ws['!rows'] = [
-            { hpt: 22 },
-            { hpt: 20 },
-            { hpt: 10 },
-            { hpt: 20 },
-            { hpt: 18 },
-            { hpt: 18 },
-            { hpt: 18 },
-            { hpt: 10 },
-            { hpt: 20 }
         ];
 
         ws['!merges'] = [
@@ -508,31 +526,28 @@ $(function () {
 
             if (statusVal === 'Good') {
                 styleCell(ws, statusRef, {
-                    fill: solidFill('C6EFCE'), // green
+                    fill: solidFill('C6EFCE'),
                     font: { bold: true, color: { rgb: '006100' }, name: 'Arial' },
                     alignment: { horizontal: 'center', vertical: 'center' },
                     border: fullBorder('D9D9D9')
                 });
-
             } else if (statusVal === 'Fair') {
                 styleCell(ws, statusRef, {
-                    fill: solidFill('FFF2CC'), // yellow
+                    fill: solidFill('FFF2CC'),
                     font: { bold: true, color: { rgb: '7F6000' }, name: 'Arial' },
                     alignment: { horizontal: 'center', vertical: 'center' },
                     border: fullBorder('D9D9D9')
                 });
-
             } else if (statusVal === 'Under Utilized') {
                 styleCell(ws, statusRef, {
-                    fill: solidFill('F4CCCC'), // red
+                    fill: solidFill('F4CCCC'),
                     font: { bold: true, color: { rgb: '9C0006' }, name: 'Arial' },
                     alignment: { horizontal: 'center', vertical: 'center' },
                     border: fullBorder('D9D9D9')
                 });
-
             } else if (statusVal === 'Not Utilized') {
                 styleCell(ws, statusRef, {
-                    fill: solidFill('D9D9D9'), // gray
+                    fill: solidFill('D9D9D9'),
                     font: { bold: true, color: { rgb: '000000' }, name: 'Arial' },
                     alignment: { horizontal: 'center', vertical: 'center' },
                     border: fullBorder('D9D9D9')
@@ -549,9 +564,11 @@ $(function () {
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startCol; c <= endCol; c++) {
                 const ref = XLSX.utils.encode_cell({ r, c });
+
                 if (!ws[ref]) {
                     ws[ref] = { t: 's', v: '' };
                 }
+
                 ws[ref].s = mergeStyle(ws[ref].s, {
                     fill: solidFill('FFFFFF'),
                     font: { name: 'Arial', sz: 10, color: { rgb: '000000' } },
@@ -562,19 +579,14 @@ $(function () {
         }
     }
 
-    function getUtilizationStatus(dayPctNum) {
-        if (dayPctNum === 0) return 'Not Utilized';
-        if (dayPctNum > 75) return 'Good';
-        if (dayPctNum >= 50) return 'Fair';
-        return 'Under Utilized';
-    }
-
     function styleRow(ws, rowIndex, startCol, endCol, style) {
         for (let c = startCol; c <= endCol; c++) {
             const ref = XLSX.utils.encode_cell({ r: rowIndex, c });
+
             if (!ws[ref]) {
                 ws[ref] = { t: 's', v: '' };
             }
+
             ws[ref].s = mergeStyle(ws[ref].s, style);
         }
     }
@@ -583,6 +595,7 @@ $(function () {
         if (!ws[ref]) {
             ws[ref] = { t: 's', v: '' };
         }
+
         ws[ref].s = mergeStyle(ws[ref].s, style);
     }
 

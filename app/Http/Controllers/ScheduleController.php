@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use App\Models\VehicleType;
+use App\Models\Transfer;
 
 class ScheduleController extends Controller
 {
@@ -20,6 +21,8 @@ class ScheduleController extends Controller
         $now = Carbon::now();
 
         $vehicleTypes = VehicleType::orderBy('type_name')->get();
+
+        $transfers = Transfer::latest()->get();
 
         $vehicles = Vehicle::query()
             ->where('status', '!=', 'disabled')
@@ -39,7 +42,7 @@ class ScheduleController extends Controller
         $chauffers = [];
 
         try {
-            $response = Http::timeout(10)->get('http://127.0.0.1:9000/api/chauffers');
+            $response = Http::timeout(10)->get('https://exploresuite.lk/api/chauffers');
 
             if ($response->successful()) {
                 $chauffers = $response->json();
@@ -48,7 +51,7 @@ class ScheduleController extends Controller
             $chauffers = [];
         }
 
-        return view('schedule.index', compact('chauffers', 'vehicles', 'transportServices','vehicleTypes'));
+        return view('schedule.index', compact('chauffers', 'vehicles', 'transportServices','vehicleTypes','transfers'));
     }
 
     public function availableVehicles(Request $request)

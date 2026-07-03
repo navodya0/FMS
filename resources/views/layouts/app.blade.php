@@ -77,7 +77,7 @@
     <body class="antialiased">
         <div class="min-h-screen bg-gray-100">
             @php
-                $isVehicleBookings = request()->routeIs('vehicle.bookings'); 
+                $isVehicleBookings = request()->routeIs('vehicle.bookings','vehicle.booking.calendar'); 
             @endphp
 
             @include('layouts.navigation')
