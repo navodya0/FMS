@@ -170,6 +170,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/vehicles/{vehicle}/disable', [VehicleController::class, 'disable'])
     ->name('vehicles.disable');
 
+    Route::post('/vehicles/{vehicle}/enable', [VehicleController::class, 'enable'])
+    ->name('vehicles.enable');
+
     Route::get('/md/reviews', [MDReviewController::class, 'index'])->name('md.reviews.index');
     Route::post('/md/reviews/{review}/decision', [MDReviewController::class, 'decision'])->name('md.reviews.decision');
     Route::post('/md-reviews/store-multiple/{inspection}', [MDReviewController::class, 'storeMultiple'])->name('md.reviews.storeMultiple');

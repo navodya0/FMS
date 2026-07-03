@@ -56,7 +56,16 @@
 
                             </div>
                             @else
-                                <span class="badge bg-secondary">Disabled</span>
+                                @if($showDisableButton === false && auth()->user()->hasRole('admin'))
+                                    <button type="button"
+                                            class="btn btn-sm btn-success enable-btn"
+                                            data-id="{{ $vehicle->id }}"
+                                            data-name="{{ $vehicle->reg_no }}">
+                                        <i class="bi bi-check-circle"></i> Enable
+                                    </button>
+                                @else
+                                    <span class="badge bg-secondary">Disabled</span>
+                                @endif
                             @endif
                         </td>
                     </tr>

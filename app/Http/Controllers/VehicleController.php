@@ -275,6 +275,17 @@ class VehicleController extends Controller
         }
     }
 
+    public function enable(Vehicle $vehicle)
+    {
+        try {
+            $vehicle->update(['status' => 'active']);
+
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function availableByDate(Request $request)
     {
         $request->validate([
