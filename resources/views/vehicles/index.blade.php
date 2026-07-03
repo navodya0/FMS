@@ -193,18 +193,42 @@
     </div>
 </div>
 
+<!-- Enable Confirmation Modal -->
+<div class="modal fade" id="enableModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Enable Vehicle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p>Are you sure you want to enable this vehicle?</p>
+                <p class="fw-bold mb-0" id="enableVehicleName"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="confirmEnableBtn" class="btn btn-success">Yes, Enable</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @foreach($vehicles as $vehicle)
     @include('vehicles.show', ['vehicle' => $vehicle])
 @endforeach
 
 @push('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 @endpush
 
 @push('scripts')
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    {{-- <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script> --}}
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -238,6 +262,34 @@
 
             let modal = new bootstrap.Modal(document.getElementById('disableModal'));
             modal.show();
+        });
+
+        let enableVehicleId = null;
+
+        $(document).on("click", ".enable-btn", function () {
+            enableVehicleId = $(this).data("id");
+            let name = $(this).data("name");
+
+            $("#enableVehicleName").text("Vehicle: " + name);
+
+            let modal = new bootstrap.Modal(document.getElementById('enableModal'));
+            modal.show();
+        });
+
+        $("#confirmEnableBtn").click(function () {
+            $.ajax({
+                url: "/vehicles/" + enableVehicleId + "/enable",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (res) {
+                    location.reload();
+                },
+                error: function () {
+                    alert("Failed to enable vehicle");
+                }
+            });
         });
 
         $("#confirmDisableBtn").click(function () {

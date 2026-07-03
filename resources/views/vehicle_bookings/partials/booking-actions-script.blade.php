@@ -36,19 +36,9 @@ document.addEventListener('DOMContentLoaded', function () {
         dropdownMenu.querySelectorAll('.booked-only, .not-booked')
             .forEach(el => el.classList.add('d-none'));
 
-        const today = new Date();
-        const arrival = new Date(arrivalDate);
-
         if (status === 'booked') {
             dropdownMenu.querySelectorAll('.booked-only')
                 .forEach(el => el.classList.remove('d-none'));
-
-            // Hide "Mark as On Tour" until arrival date
-            if (today < arrival) {
-                dropdownMenu
-                    .querySelector('[data-action="mark-on-tour"]')
-                    ?.classList.add('d-none');
-            }
         } else {
             dropdownMenu.querySelectorAll('.not-booked')
                 .forEach(el => el.classList.remove('d-none'));

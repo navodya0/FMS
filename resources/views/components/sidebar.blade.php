@@ -15,12 +15,24 @@
                 @php
                     $isVehicleBookings = request()->routeIs('vehicle.bookings'); 
                     $disabledTooltip = 'Disabled while viewing vehicle bookings';
+                  
+                    $helpTicketCount = 0;
+
+                    if (auth()->user()->hasRole(['admin', 'super_admin', 'it_admin'])) {
+                        $helpTicketCount = \App\Models\Ticket::whereIn('status', ['pending', 'open', 'in_progress'])->count();
+                    }
 
                     $sidebarLinks = [
                         ['name' => 'Dashboard', 'icon' => 'dashboard.svg', 'route' => 'dashboard', 'permission' => null],
-                        ['name' => 'Reports', 'icon' => 'reports.svg', 'route' => 'reports.index', 'permission' => 'view_reports'],                        
+
+                        ['name' => 'IT HelpDesk', 'icon' => 'help.svg', 'route' => 'help.index', 'permission' => null],
+
+                        ['name' => 'HelpDesk Summary', 'icon' => 'summary.svg', 'route' => 'helpdesk.summary', 'permission' => 'manage_general-manager'],
+
+                        ['name' => 'Reports', 'icon' => 'reports.svg', 'route' => 'reports.index', 'permission' => null],                        
                         ['name' => 'Vehicle Details', 'icon' => 'details.svg', 'route' => 'vehicle-details.index', 'permission' => 'manage_vehicle_details'],
                         ['name' => 'Vehicle Fuel QR', 'icon' => 'qr.svg', 'route' => 'qr-details.index', 'permission' => null],
+                        ['name' => 'Vehicle Booking Calendar', 'icon' => 'calendar.svg', 'route' => 'vehicle.booking.calendar', 'permission' => null],
 
                         ['name' => 'Fuel Logs', 'icon' => 'fuel.svg', 'route' => 'fuel-logs.index', 'permission' => 'manage_procurements'],
 
@@ -45,6 +57,7 @@
                         ['name' => 'Fleet Faults', 'icon' => 'cancel.svg', 'route' => 'faults.index', 'permission' => 'manage_inspection-reports'],
                         ['name' => 'Garage Faults', 'icon' => 'car-repair.svg', 'route' => 'issues.index', 'permission' => 'manage_inspection-reports'],
                         ['name' => 'Vehicle Attributes', 'icon' => 'attributes.svg', 'route' => 'vehicle-attributes.index', 'permission' => 'manage_vehicles'],
+
                         ['name' => 'Users', 'icon' => 'users.svg', 'route' => 'users.index', 'permission' => 'manage_users'],
                         ['name' => 'Permissions', 'icon' => 'permissions.svg', 'route' => 'permissions.index', 'permission' => 'manage_permissions'],
                     ];
@@ -71,7 +84,15 @@
                                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900') }}"
                     title="{{ $tooltip }}">
                         <img src="{{ asset('assets/'.$link['icon']) }}" class="mr-3 h-8 w-8" alt="{{ $link['name'] }} Icon">
-                        <span>{{ $link['name'] }}</span>
+                        <span class="d-flex align-items-center justify-content-between w-100">
+                            <span>{{ $link['name'] }}</span>
+
+                            @if($link['route'] === 'help.index' && $helpTicketCount > 0)
+                                <span class="badge bg-danger ms-2">
+                                    {{ $helpTicketCount }}
+                                </span>
+                            @endif
+                        </span>
                     </a>
                 @endforeach
             </div>

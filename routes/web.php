@@ -37,7 +37,9 @@ use App\Http\Controllers\VehicleDetailsController;
 use App\Http\Controllers\QRDetailsController;
 use App\Http\Controllers\FuelLogController;
 use App\Http\Controllers\BarrelController;
-
+use App\Http\Controllers\TransferController;
+use App\Http\Controllers\VehicleBookingCalendarController;
+use App\Http\Controllers\HelpController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -167,6 +169,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/vehicles/{vehicle}/disable', [VehicleController::class, 'disable'])
     ->name('vehicles.disable');
+
+    Route::post('/vehicles/{vehicle}/enable', [VehicleController::class, 'enable'])
+    ->name('vehicles.enable');
 
     Route::get('/md/reviews', [MDReviewController::class, 'index'])->name('md.reviews.index');
     Route::post('/md/reviews/{review}/decision', [MDReviewController::class, 'decision'])->name('md.reviews.decision');
@@ -300,6 +305,65 @@ Route::post('/barrels', [BarrelController::class, 'store'])->name('barrels.store
 Route::delete('/barrels/{id}', [BarrelController::class, 'destroy'])->name('barrels.destroy');
 
 Route::post('/fuel-logs', [FuelLogController::class, 'store'])->name('fuel-logs.store');
+
+
+Route::get('/transport-services/shuttle-bookings', [TransportServiceController::class, 'getShuttleBookings'])
+    ->name('transport-services.shuttle-bookings');
+
+
+
+
+Route::post('/transfers', [TransferController::class, 'store'])->name('transfers.store');
+Route::post('/transfers/assign', [TransferController::class, 'assign'])->name('transfers.assign');
+
+
+
+
+Route::get('/vehicle-booking-calendar', [VehicleBookingCalendarController::class, 'index'])
+    ->name('vehicle.booking.calendar');
+
+Route::get('/vehicle-booking-calendar/export-csv', [VehicleBookingCalendarController::class, 'exportCsv'])
+    ->name('vehicle.booking.calendar.export.csv');
+
+
+    Route::patch('/rentals/{rental}/departure-time', [RentalController::class, 'updateDepartureTime'])
+    ->name('rentals.updateDepartureTime');
+
+    Route::get('/vehicles/available-by-date', [VehicleController::class, 'availableByDate'])
+    ->name('vehicles.availableByDate');
+
+    Route::get('/vehicle-freezes/{vehicle}/booked-dates', [VehicleFreezeController::class, 'bookedDates'])
+    ->name('vehicle-freezes.booked-dates');
+
+
+    // Route::get('/help', [HelpController::class, 'index'])->name('help.index');
+    // Route::post('/help/tickets', [HelpController::class, 'store'])->name('help.tickets.store');
+    // Route::put('/help/tickets/{ticket}', [HelpController::class, 'adminUpdate'])->name('admin.help.tickets.update');
+
+    // Route::get('/admin/help/tickets', [HelpController::class, 'adminIndex'])->name('admin.help.tickets');
+
+    // Route::post('/help/ticket-categories', [HelpController::class, 'storeCategory'])
+    //     ->name('admin.ticket-categories.store');
+
+    // Route::put('/help/ticket-categories/{category}', [HelpController::class, 'updateCategory'])
+    //     ->name('admin.ticket-categories.update');
+
+    // Route::delete('/help/ticket-categories/{category}', [HelpController::class, 'deleteCategory'])
+    //     ->name('admin.ticket-categories.delete');
+
+
+
+            Route::get('/help', [HelpController::class, 'index'])->name('help.index');
+    Route::post('/help/tickets', [HelpController::class, 'store'])->name('help.tickets.store');
+    Route::put('/help/tickets/{ticket}', [HelpController::class, 'adminUpdate'])->name('admin.help.tickets.update');
+
+    Route::post('/help/tickets/{ticket}/user-reply', [HelpController::class, 'userReply'])->name('help.tickets.user-reply');
+
+    Route::post('/help/ticket-categories', [HelpController::class, 'storeCategory'])->name('admin.ticket-categories.store');
+    Route::put('/help/ticket-categories/{category}', [HelpController::class, 'updateCategory'])->name('admin.ticket-categories.update');
+    Route::delete('/help/ticket-categories/{category}', [HelpController::class, 'deleteCategory'])->name('admin.ticket-categories.delete');
+
+    Route::get('/helpdesk-summary', [HelpController::class, 'summary'])->name('helpdesk.summary');
 });
 
 require __DIR__.'/auth.php';

@@ -11,6 +11,7 @@ class TransportService extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'rental_id',
         'type',
         'vehicle_id',
         'assigned_start_at',

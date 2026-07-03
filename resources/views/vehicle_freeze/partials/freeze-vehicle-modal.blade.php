@@ -1,3 +1,13 @@
+<style>
+.flatpickr-day.booked-rental-date,
+.flatpickr-day.booked-rental-date:hover {
+    background: #dc3545 !important;
+    color: #fff !important;
+    border-color: #dc3545 !important;
+    text-decoration: line-through;
+}
+</style>
+
 <div class="modal fade" id="freezeVehicleModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <form method="POST" action="{{ route('vehicle-freezes.store') }}">
@@ -13,9 +23,18 @@
                 @endphp
                 
                 <div class="modal-body row g-3">
+
+                    <div class="col-md-12">
+                        <div id="bookedRentalNote" class="alert alert-warning d-none mb-0">
+                            <strong>Note:</strong> Marked dates are already booked rentals.
+                                    {{-- <div id="bookedRentalList" class="small mt-2"></div> --}}
+
+                        </div>
+                    </div>
                     <div class="col-md-6">
                         <label class="form-label">Vehicle<span class="text-danger">*</span></label>
-                        <select name="vehicle_id" class="form-select select2" required>
+                        {{-- <select name="vehicle_id" class="form-select select2" required> --}}
+                            <select name="vehicle_id" id="freeze_vehicle_id" class="form-select select2" required>
                             <option value="">Select Vehicle</option>
                             @foreach($vehicles as $vehicle)
                                 <option value="{{ $vehicle->id }}">
@@ -27,12 +46,13 @@
 
                     <div class="col-md-3">
                         <label class="form-label">Start Date<span class="text-danger">*</span></label>
-                        <input type="date" name="start_date" class="form-control" required min="{{ $today }}">
+                        <input type="text" id="freeze_start_date" name="start_date" class="form-control" required>
+
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label">End Date<span class="text-danger">*</span></label>
-                        <input type="date" name="end_date" class="form-control" required min="{{ $tomorrow }}" value="{{ $tomorrow }}">
+                        <input type="text" id="freeze_end_date" name="end_date" class="form-control" required>
                     </div>
 
                     <div class="col-md-12">
@@ -69,11 +89,19 @@
 
 @push('scripts')
 
+
+
 <script>
-    $(document).ready(function() {
-        $('.select2').select2({
+    $(document).on('shown.bs.modal', '#freezeVehicleModal', function () {
+        const $select = $('#freeze_vehicle_id');
+
+        if ($select.hasClass('select2-hidden-accessible')) {
+            $select.select2('destroy');
+        }
+
+        $select.select2({
             dropdownParent: $('#freezeVehicleModal'),
-            placeholder: "Search...",
+            placeholder: 'Search vehicle...',
             allowClear: true,
             width: '100%'
         });
@@ -82,17 +110,90 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const reasonSelect = document.getElementById('reasonSelect');
-    const otherInput = document.getElementById('otherReasonInput');
+    const noteBox = document.getElementById('bookedRentalNote');
+    const listBox = document.getElementById('bookedRentalList');
 
-    reasonSelect.addEventListener('change', function () {
-        if (this.value === 'Other') {
-            otherInput.style.display = 'block';
-            otherInput.required = true; // Make it required when visible
-        } else {
-            otherInput.style.display = 'none';
-            otherInput.required = false;
+    let disabledDates = [];
+
+    function paintBookedDates(dObj, dStr, fp, dayElem) {
+        const date = flatpickr.formatDate(dayElem.dateObj, 'Y-m-d');
+
+        if (disabledDates.includes(date)) {
+            dayElem.classList.add('booked-rental-date');
+            dayElem.title = 'Booked rental';
         }
+    }
+
+    const startPicker = flatpickr('#freeze_start_date', {
+        dateFormat: 'Y-m-d',
+        minDate: 'today',
+        disable: [],
+        onDayCreate: paintBookedDates
+    });
+
+    const endPicker = flatpickr('#freeze_end_date', {
+        dateFormat: 'Y-m-d',
+        minDate: 'today',
+        disable: [],
+        onDayCreate: paintBookedDates
+    });
+
+    function resetBookedInfo() {
+        disabledDates = [];
+
+        startPicker.clear();
+        endPicker.clear();
+
+        startPicker.set('disable', []);
+        endPicker.set('disable', []);
+
+        if (noteBox) noteBox.classList.add('d-none');
+        if (listBox) listBox.innerHTML = '';
+
+        startPicker.redraw();
+        endPicker.redraw();
+    }
+
+    function loadBookedDates(vehicleId) {
+        resetBookedInfo();
+
+        if (!vehicleId) return;
+
+        fetch(`/vehicle-freezes/${vehicleId}/booked-dates`)
+            .then(res => {
+                if (!res.ok) throw new Error('Route not found or server error');
+                return res.json();
+            })
+            .then(data => {
+                disabledDates = data.disabled_dates || [];
+                const bookedRanges = data.booked_ranges || [];
+
+                startPicker.set('disable', disabledDates);
+                endPicker.set('disable', disabledDates);
+
+                startPicker.redraw();
+                endPicker.redraw();
+
+                if (bookedRanges.length && noteBox) {
+                    noteBox.classList.remove('d-none');
+
+                    if (listBox) {
+                        listBox.innerHTML = bookedRanges.map(r => `
+                            <div>
+                                <span class="badge bg-danger">${r.booking_number}</span>
+                                ${r.from} to ${r.to}
+                            </div>
+                        `).join('');
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Booked dates fetch error:', err);
+            });
+    }
+
+    $('#freeze_vehicle_id').on('change select2:select', function () {
+        loadBookedDates(this.value);
     });
 });
 </script>

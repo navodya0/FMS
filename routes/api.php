@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Models\Rental;
+use App\Http\Controllers\Api\VehicleUtilizationController;
+
 
 Route::middleware('api_token')->get('/vehicles/by-reg-no', [VehicleLookupController::class, 'byRegNo']);
 
@@ -14,7 +16,11 @@ Route::post('/transport-services/validate-vehicle', [
     TransportServiceController::class, 'validateVehicleForTransport'
 ]);
 
+Route::post('/transport-services/sync-vehicle-assignment', [TransportServiceController::class, 'syncVehicleAssignment']);
+
 Route::get('/vehicle-details/{vehicleNumber}', [QRDetailsController::class, 'getVehicleDetails']);
+
+Route::get('/available-vehicles', [TransportServiceController::class, 'getAvailableVehicles']);
 
 Route::post('/rental-sync', function (Request $request) {
     $receivedSecret = $request->header('X-SYNC-SECRET');
@@ -35,48 +41,53 @@ Route::post('/rental-sync', function (Request $request) {
     try {
         $data = $request->validate([
             'booking_number' => 'required|string',
-            'vehicle_id' => 'required|integer',
-            'company_id' => 'required|integer',
-            'driver_name' => 'required|string',
-            'arrival_date' => 'required|date',
+            'vehicle_id'     => 'required|integer',
+            'company_id'     => 'required|integer',
+            'driver_name'    => 'required|string',
+            'arrival_date'   => 'required|date',
             'departure_date' => 'required|date',
-            'passengers' => 'required|integer',
-            'status' => 'required|string',
-            'created_by' => 'required|integer',
+            'passengers'     => 'required|integer',
+            'status'         => 'required|string',
+            'created_by'     => 'required|integer',
 
-            // optional extras
-            'transport_id' => 'nullable|integer',
-            'vehicle_no' => 'nullable|string',
-            'reason' => 'nullable|string',
-            'contact_no' => 'nullable|string',
-            'vehicle_type' => 'nullable|string',
+            'transport_id'   => 'nullable|integer',
+            'vehicle_no'     => 'nullable|string',
+            'reason'         => 'nullable|string',
+            'contact_no'     => 'nullable|string',
+            'vehicle_type'   => 'nullable|string',
         ]);
 
         $rental = Rental::create([
+            'transport_id'   => $data['transport_id'] ?? null,
             'booking_number' => $data['booking_number'],
-            'vehicle_id' => $data['vehicle_id'],
-            'company_id' => $data['company_id'],
-            'driver_name' => $data['driver_name'],
-            'salutation' => null,
-            'arrival_date' => $data['arrival_date'],
+            'vehicle_id'     => $data['vehicle_id'],
+            'company_id'     => $data['company_id'],
+            'driver_name'    => $data['driver_name'],
+            'salutation'     => null,
+            'arrival_date'   => $data['arrival_date'],
             'departure_date' => $data['departure_date'],
-            'passengers' => $data['passengers'],
-            'status' => $data['status'],
-            'created_by' => $data['created_by'],
+            'passengers'     => $data['passengers'],
+            'status'         => $data['status'],
+            'created_by'     => $data['created_by'],
+        ]);
+
+        Log::info('Rental created from transport sync', [
+            'rental_id'     => $rental->id,
+            'transport_id'  => $data['transport_id'] ?? null,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Rental created successfully',
-            'data' => $rental,
+            'data'    => $rental,
         ], 201);
 
     } catch (Throwable $e) {
         Log::error('Rental Sync Error', [
             'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+            'trace'   => $e->getTraceAsString(),
         ]);
 
         return response()->json([
@@ -85,3 +96,43 @@ Route::post('/rental-sync', function (Request $request) {
         ], 500);
     }
 });
+
+Route::post('/rental-cancel', function (Request $request) {
+
+    $receivedSecret = $request->header('X-SYNC-SECRET');
+    $expectedSecret = config('services.rental_sync.secret');
+
+    if (($receivedSecret ?? '') !== ($expectedSecret ?? '')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    $data = $request->validate([
+        'transport_id' => 'required|integer',
+    ]);
+
+    $rental = Rental::where('transport_id', $data['transport_id'])->first();
+
+    if (!$rental) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Rental not found',
+        ], 404);
+    }
+
+    // store for response/logging before delete
+    $deletedRental = $rental->toArray();
+
+    $rental->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Rental deleted successfully',
+        'data' => $deletedRental
+    ]);
+});
+
+
+Route::get('/vehicle-utilization', [VehicleUtilizationController::class, 'summary']);

@@ -1,5 +1,6 @@
 <div class="container mb-2">
     <div class="d-flex gap-3 align-items-center">
+        <div class="fw-bold"><span class="legend-box personal-booking"></span> Personal Booking</div>
         <div class="fw-bold"><span class="legend-box past-booking"></span> Past Booking</div>
         <div class="fw-bold"><span class="legend-box current-booking"></span> On Tour</div>
         <div class="fw-bold"><span class="legend-box future-booking"></span> Future Bookings</div>
@@ -8,6 +9,15 @@
         <div class="fw-bold"><span class="legend-box past-date"></span> Underutilized</div>
         <div class="fw-bold"><span class="legend-box vehicle-frozen-date"></span> Frozen Date</div>
         <div class="fw-bold"><span class="legend-box alternative-range"></span> Alternative Vehicle</div>
+    <div class="fw-bold d-flex align-items-center">
+    <span class="cross-indicator indicator-sr-elite me-1"></span>
+    SR → Elite Booking
+</div>
+
+<div class="fw-bold d-flex align-items-center">
+    <span class="cross-indicator indicator-elite-sr me-1"></span>
+    Elite → SR Booking
+</div>
     </div>
 </div>  
 
@@ -115,44 +125,41 @@
                     }
 
                     // Map frozen periods per vehicle
+                  // Map frozen periods per vehicle
                     $freezeMap = [];
-                    if($vehicle->freezes->count()) {
-                        foreach($vehicle->freezes as $freeze) {
-                            $freezeStart = \Carbon\Carbon::parse($freeze->start_date);
+
+                    if ($vehicle->freezes->count()) {
+                        $monthStart = \Carbon\Carbon::create($year, $month, 1)->startOfDay();
+                        $monthEnd   = $monthStart->copy()->endOfMonth()->endOfDay();
+
+                        foreach ($vehicle->freezes as $freeze) {
+                            $freezeStart = \Carbon\Carbon::parse($freeze->start_date)->startOfDay();
+
                             $freezeEnd = $freeze->end_date
-                                ? \Carbon\Carbon::parse($freeze->end_date)
-                                : $freezeStart->copy();
-                           
-                            if (
-                                $freezeStart->year > $year ||
-                                ($freezeStart->year == $year && $freezeStart->month > $month)
-                            ) {
-                                continue;
-                            }
-                            $startDay = ($freezeStart->year == $year && $freezeStart->month == $month)
-                                ? $freezeStart->day
-                                : null;
+                                ? \Carbon\Carbon::parse($freeze->end_date)->endOfDay()
+                                : $freezeStart->copy()->endOfDay();
 
-                            $endDay = ($freezeEnd->year == $year && $freezeEnd->month == $month)
-                                ? $freezeEnd->day
-                                : null;
-
-                            if ($startDay === null && $endDay === null) {
+                            // Skip freezes that do not overlap this month
+                            if ($freezeEnd->lt($monthStart) || $freezeStart->gt($monthEnd)) {
                                 continue;
                             }
 
-                            $startDay = $startDay ?? 1;
-                            $endDay   = $endDay ?? $daysInMonth;
+                            $startDay = $freezeStart->lt($monthStart)
+                                ? 1
+                                : $freezeStart->day;
 
-                           for($d = $startDay; $d <= $endDay; $d++) {
+                            $endDay = $freezeEnd->gt($monthEnd)
+                                ? $daysInMonth
+                                : $freezeEnd->day;
+
+                            for ($d = $startDay; $d <= $endDay; $d++) {
                                 $freezeMap[$d] = [
-                                    'reason'     => $freeze->reason,
-                                    'is_start'  => ($d == $startDay),
-                                    'start_date'=> $freezeStart->format('Y-m-d'),
-                                    'end_date'  => $freezeEnd->format('Y-m-d')
+                                    'reason'      => $freeze->reason,
+                                    'is_start'    => ($d == $startDay),
+                                    'start_date'  => $freezeStart->format('Y-m-d'),
+                                    'end_date'    => $freezeEnd->format('Y-m-d'),
                                 ];
                             }
-
                         }
                     }
                 @endphp
@@ -255,10 +262,44 @@
                                 $cellClass = 'future-booking';
                                 $canOpenModal = true;
                             }
+                                $srCompanies = [1, 2, 4, 5];
+                                $eliteCompanies = [3, 6];
+
+                                $srUserIds = [66, 36]; // you earlier said 66 and 36
+                                $eliteUserIds = [75];
+
+                                $vehicleIsSr = in_array($vehicle->company_id, $srCompanies);
+                                $vehicleIsElite = in_array($vehicle->company_id, $eliteCompanies);
+
+                                $creatorId =
+                                    data_get($booking, 'creator.causer.id')
+                                    ?? data_get($booking, 'creator_id')
+                                    ?? data_get($booking, 'user_id');
+
+                                $creatorIsSr = in_array((int) $creatorId, $srUserIds);
+                                $creatorIsElite = in_array((int) $creatorId, $eliteUserIds);
+
+                                $indicatorClass = '';
+
+                                if ($vehicleIsSr && $creatorIsElite) {
+                                    $indicatorClass = 'indicator-sr-elite';
+                                }
+
+                                if ($vehicleIsElite && $creatorIsSr) {
+                                    $indicatorClass = 'indicator-elite-sr';
+                                }
+
+                            $bookingNumber = strtoupper($booking->booking_number ?? '');
+
+                            $isSpecialBooking =
+                                str_contains($bookingNumber, 'PERSONAL') ||
+                                str_contains($bookingNumber, 'shuttle') ||
+                                str_contains($bookingNumber, 'transfers') ||
+                                str_contains($bookingNumber, 'OFFICE');
 
                             $creatorName = data_get($booking, 'creator.causer.name')
                                         ?? data_get($booking, 'creatorName.name')
-                                        ?? 'System';  
+                                        ?? ($isSpecialBooking ? 'EES APP' : 'Deshan');
                                                               
                             // $creatorName = $creatorName === 'N/A' ? 'System' : $creatorName;
 
@@ -286,7 +327,11 @@
                                 }
                         @endphp
 
-                      <td class="booking-cell {{ $cellClass }}" 
+                        @php
+                            $isPersonal = str_contains($booking->booking_number, 'PERSONAL');
+                        @endphp
+
+                        <td class="booking-cell {{ $cellClass }} {{ $isPersonal ? 'personal-booking' : '' }}"
                         colspan="{{ $colspan }}"
                         data-booking-id="{{ $booking->id }}"
                         data-arrival="{{ $booking->arrival_date }}"
@@ -306,7 +351,12 @@
                         )'
                         data-bs-html="true"
                         title="{{ $tooltipHtml }}">
-                        <span class="booking-number">{{ $booking->booking_number }}</span>
+                        <span class="booking-number">
+    @if($indicatorClass)
+        <span class="cross-indicator {{ $indicatorClass }}"></span>
+    @endif
+    {{ $booking->booking_number }}
+</span>
                     </td>
 
                         @php $currentDay += $colspan; @endphp
