@@ -1,6 +1,6 @@
 <div class="card shadow-sm border-0">
     <div class="table-responsive card-body p-3">
-        <table id="vehiclesTable" class="table table-striped table-hover mb-0">
+        <table id="{{ $tableId ?? 'vehiclesTable' }}" class="table table-striped table-hover mb-0">
             <thead class="table-dark">
                 <tr>
                     <th>#</th>

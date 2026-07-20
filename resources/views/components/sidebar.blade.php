@@ -25,9 +25,9 @@
                     $sidebarLinks = [
                         ['name' => 'Dashboard', 'icon' => 'dashboard.svg', 'route' => 'dashboard', 'permission' => null],
 
-                        ['name' => 'IT HelpDesk', 'icon' => 'help.svg', 'route' => 'help.index', 'permission' => null],
+                        // ['name' => 'IT HelpDesk', 'icon' => 'help.svg', 'route' => 'help.index', 'permission' => null],
 
-                        ['name' => 'HelpDesk Summary', 'icon' => 'summary.svg', 'route' => 'helpdesk.summary', 'permission' => 'manage_general-manager'],
+                        // ['name' => 'HelpDesk Summary', 'icon' => 'summary.svg', 'route' => 'helpdesk.summary', 'permission' => 'manage_general-manager'],
 
                         ['name' => 'Reports', 'icon' => 'reports.svg', 'route' => 'reports.index', 'permission' => null],                        
                         ['name' => 'Vehicle Details', 'icon' => 'details.svg', 'route' => 'vehicle-details.index', 'permission' => 'manage_vehicle_details'],
