@@ -18,6 +18,17 @@ document.addEventListener('DOMContentLoaded', function () {
     let fpAltInstance = null;
 
     // ----- HELPER FUNCTIONS -----
+
+    /**
+     * Close the modal and refresh only the booking grid (no full page reload).
+     */
+    function closeAndRefreshGrid() {
+        modal.hide();
+        if (typeof window.refreshBookingGrid === 'function') {
+            window.refreshBookingGrid();
+        }
+    }
+
     function resetModal() {
         // Hide all sections
         markArrivedDiv.classList.add('d-none');
@@ -66,6 +77,81 @@ document.addEventListener('DOMContentLoaded', function () {
         updateDropdownActions(bookingStatus, arrivalDate);
 
         modal.show();
+    });
+
+    // ----- INTERCEPT FORM SUBMISSIONS (convert to AJAX) -----
+
+    // Mark Arrived — Routine
+    document.getElementById('routineArrivalForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const bookingId = bookingIdInput.value;
+        fetch(`/vehicle-bookings/${bookingId}/arrived`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ _method: 'PATCH', arrival_type: 'routine' })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed');
+            return res.json();
+        })
+        .then(() => closeAndRefreshGrid())
+        .catch(() => alert('Failed to mark as arrived (routine).'));
+    });
+
+    // Mark Arrived — Emergency (still redirects to inspection page)
+    // Left as normal form submit since it navigates to a different page
+
+    // Extend Departure
+    extendForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const bookingId = bookingIdInput.value;
+        const newDate = document.getElementById('newDepartureDate').value;
+        fetch(`/vehicle-bookings/${bookingId}/extend-departure`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ _method: 'PATCH', new_departure_date: newDate })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed');
+            return res.json();
+        })
+        .then(() => closeAndRefreshGrid())
+        .catch(() => alert('Failed to extend departure date.'));
+    });
+
+    // Assign Alternative Vehicle
+    alternativeForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const bookingId = bookingIdInput.value;
+        fetch(`/vehicle-bookings/${bookingId}/assign-alternative`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                _method: 'PATCH',
+                new_vehicle_id: formData.get('new_vehicle_id'),
+                alternative_start_date: formData.get('alternative_start_date'),
+                change_reason: formData.get('change_reason')
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed');
+            return res.json();
+        })
+        .then(() => closeAndRefreshGrid())
+        .catch(() => alert('Failed to assign alternative vehicle.'));
     });
 
     // ----- DROPDOWN ACTIONS -----
@@ -121,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         'Content-Type': 'application/json'
                                     }
                                 });
-                                if(res.ok) location.reload();
+                                if(res.ok) closeAndRefreshGrid();
                                 else alert("Failed to cancel booking");
                             });
                         });
@@ -243,9 +329,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (!res.ok) throw new Error('Failed');
                     return res.json();
                 })
-                .then(() => {
-                    location.reload();
-                })
+                .then(() => closeAndRefreshGrid())
                 .catch(() => {
                     alert('Failed to mark booking as On Tour.');
                 });
@@ -313,16 +397,13 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (!res.ok) throw new Error('Failed to change vehicle');
                                 return res.json();
                             })
-                            .then(() => {
-                                alert('Vehicle changed successfully');
-                                location.reload(); 
-                            })
+                            .then(() => closeAndRefreshGrid())
                             .catch(err => alert(err.message));
                         });
                     });
             break;
 
-            // ----- CANCEL BOOKING -----
+            // ----- REMOVE BOOKING -----
             case 'remove-booking':
                 fetch(`/rentals/${bookingId}/related-rentals-tour`)
                     .then(res => res.json())
@@ -354,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         'Content-Type': 'application/json'
                                     }
                                 });
-                                if(res.ok) location.reload();
+                                if(res.ok) closeAndRefreshGrid();
                                 else alert("Failed to cancel booking");
                             });
                         });

@@ -153,6 +153,10 @@ class RentalController extends Controller
             ])
             ->log('Vehicle marked as arrived (routine)');
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Vehicle marked as arrived.']);
+        }
+
         return redirect()
             ->route('vehicle.bookings')
             ->with('success', 'Vehicle marked as arrived.');
@@ -478,6 +482,10 @@ class RentalController extends Controller
             ])
             ->log('Assigned an alternative vehicle to rental');
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Alternative vehicle assigned successfully.']);
+        }
+
         return redirect()
             ->route('vehicle.bookings')
             ->with('success', 'Alternative vehicle assigned successfully.');
@@ -507,6 +515,10 @@ class RentalController extends Controller
                 'new_departure_date' => $rental->departure_date,
             ])
             ->log('Extended rental departure date');
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Departure date extended successfully.']);
+        }
 
         return redirect()->route('vehicle.bookings')->with('success', 'Departure date extended successfully.');
     }
