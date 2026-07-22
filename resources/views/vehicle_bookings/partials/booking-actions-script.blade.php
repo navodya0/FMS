@@ -200,15 +200,31 @@ document.addEventListener('DOMContentLoaded', function () {
                         cancelTableBody.querySelectorAll('.btnCancelSingle').forEach(btn => {
                             btn.addEventListener('click', async function(){
                                 if(!confirm("Are you sure you want to cancel this booking?")) return;
-                                const res = await fetch(`/rentals/${this.dataset.id}/cancel`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                                        'Content-Type': 'application/json'
+
+                                const originalText = this.innerHTML;
+                                this.disabled = true;
+                                this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Cancelling...';
+
+                                try {
+                                    const res = await fetch(`/rentals/${this.dataset.id}/cancel`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/json'
+                                        }
+                                    });
+                                    if(res.ok) closeAndRefreshGrid();
+                                    else {
+                                        alert("Failed to cancel booking");
+                                        this.disabled = false;
+                                        this.innerHTML = originalText;
                                     }
-                                });
-                                if(res.ok) closeAndRefreshGrid();
-                                else alert("Failed to cancel booking");
+                                } catch(err) {
+                                    alert("Failed to cancel booking");
+                                    this.disabled = false;
+                                    this.innerHTML = originalText;
+                                }
                             });
                         });
                     });
@@ -428,15 +444,31 @@ document.addEventListener('DOMContentLoaded', function () {
                         cancelTableBody.querySelectorAll('.btnCancelSingle').forEach(btn => {
                             btn.addEventListener('click', async function(){
                                 if(!confirm("Are you sure you want to cancel this booking?")) return;
-                                const res = await fetch(`/rentals/${this.dataset.id}/remove`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                                        'Content-Type': 'application/json'
+
+                                const originalText = this.innerHTML;
+                                this.disabled = true;
+                                this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Removing...';
+
+                                try {
+                                    const res = await fetch(`/rentals/${this.dataset.id}/remove`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/json'
+                                        }
+                                    });
+                                    if(res.ok) closeAndRefreshGrid();
+                                    else {
+                                        alert("Failed to cancel booking");
+                                        this.disabled = false;
+                                        this.innerHTML = originalText;
                                     }
-                                });
-                                if(res.ok) closeAndRefreshGrid();
-                                else alert("Failed to cancel booking");
+                                } catch(err) {
+                                    alert("Failed to cancel booking");
+                                    this.disabled = false;
+                                    this.innerHTML = originalText;
+                                }
                             });
                         });
                     });

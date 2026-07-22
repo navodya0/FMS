@@ -328,6 +328,9 @@ class RentalController extends Controller
         $rental = Rental::findOrFail($id);
 
         if ($rental->status !== 'booked') {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Only booked rentals can be cancelled.'], 422);
+            }
             return redirect()->back()->with(
                 'error',
                 'Only booked rentals can be cancelled.'
@@ -352,6 +355,10 @@ class RentalController extends Controller
                 'status'    => 'booked',
             ])
             ->log('Cancelled and deleted booked rental');
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Booked rental cancelled successfully.']);
+        }
 
         return redirect()->back()->with(
             'success',
@@ -379,6 +386,9 @@ class RentalController extends Controller
         $rental = Rental::findOrFail($id);
 
         if ($rental->status !== 'rented') {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Only rented bookings can be cancelled.'], 422);
+            }
             return redirect()->back()->with(
                 'error',
                 'Only rented bookings can be cancelled.'
@@ -403,6 +413,10 @@ class RentalController extends Controller
                 'status'    => 'booked',
             ])
             ->log('Cancelled and deleted booked rental');
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Booked rental cancelled successfully.']);
+        }
 
         return redirect()->back()->with(
             'success',
