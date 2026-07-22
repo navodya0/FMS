@@ -300,6 +300,10 @@
                             $creatorName = data_get($booking, 'creator.causer.name')
                                         ?? data_get($booking, 'creatorName.name')
                                         ?? ($isSpecialBooking ? 'EES APP' : 'Deshan');
+
+                            if (str_starts_with($bookingNumber, 'TP')) {
+                                $creatorName = 'TERMINAL PRIME';
+                            }
                                                               
                             // $creatorName = $creatorName === 'N/A' ? 'System' : $creatorName;
 
