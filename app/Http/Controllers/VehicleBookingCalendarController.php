@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\Rental;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
@@ -26,13 +27,19 @@ class VehicleBookingCalendarController extends Controller
         $totalDays = $days->count();
 
         $vehicleTypes = VehicleType::orderBy('type_name')->get();
+        $companies = Company::orderBy('name')->get();
 
         $selectedTypeId = $request->get('type_id', 'all');
         $selectedCategoryId = $request->get('category_id', 'all');
+        $selectedCompanyId = $request->get('company_id', 'all');
 
         $selectedVehicleType = $selectedTypeId === 'all'
             ? 'All Types'
             : optional($vehicleTypes->firstWhere('id', $selectedTypeId))->type_name;
+
+        $selectedCompanyName = $selectedCompanyId === 'all'
+            ? 'All Companies'
+            : optional($companies->firstWhere('id', $selectedCompanyId))->name;
 
         $vehicleCategories = VehicleCategory::query()
             ->when($selectedTypeId !== 'all', function ($query) use ($selectedTypeId) {
@@ -52,7 +59,8 @@ class VehicleBookingCalendarController extends Controller
             $endOfMonth,
             $totalDays,
             $selectedTypeId,
-            $selectedCategoryId
+            $selectedCategoryId,
+            $selectedCompanyId
         );
 
         return view('vehicle-booking-calendar.index', [
@@ -65,10 +73,13 @@ class VehicleBookingCalendarController extends Controller
             'nextMonth' => $month->copy()->addMonth()->format('Y-m'),
             'vehicleTypes' => $vehicleTypes,
             'vehicleCategories' => $vehicleCategories,
+            'companies' => $companies,
             'selectedTypeId' => $selectedTypeId,
             'selectedCategoryId' => $selectedCategoryId,
+            'selectedCompanyId' => $selectedCompanyId,
             'selectedVehicleType' => $selectedVehicleType,
             'selectedVehicleCategory' => $selectedVehicleCategory,
+            'selectedCompanyName' => $selectedCompanyName,
         ]);
     }
 
@@ -124,6 +135,7 @@ class VehicleBookingCalendarController extends Controller
 
             fputcsv($handle, [
                 'Vehicle No',
+                'Company Name',
                 'Vehicle Type',
                 'Vehicle Category',
                 'Total Bookings',
@@ -137,6 +149,7 @@ class VehicleBookingCalendarController extends Controller
 
                 fputcsv($handle, [
                     $row['vehicle']->reg_no ?? ('Vehicle #' . $row['vehicle']->id),
+                    $row['vehicle']->company->name ?? '-',
                     $row['vehicle']->vehicleType->type_name ?? '-',
                     $row['vehicle']->vehicleCategory->name ?? '-',
                     count($row['ranges']),
@@ -167,13 +180,14 @@ class VehicleBookingCalendarController extends Controller
         Carbon $endOfMonth,
         int $totalDays,
         string|int $typeId = 'all',
-        string|int $categoryId = 'all'
+        string|int $categoryId = 'all',
+        string|int $companyId = 'all'
     ) {
         $freezedVehicleIds = DB::table('vehicle_freezes')
             ->pluck('vehicle_id')
             ->toArray();
 
-        $vehiclesQuery = Vehicle::with(['vehicleType', 'vehicleCategory'])
+        $vehiclesQuery = Vehicle::with(['vehicleType', 'vehicleCategory', 'company'])
             ->where('status', '!=', 'disabled')
             ->orderBy('reg_no', 'asc');
 
@@ -183,6 +197,10 @@ class VehicleBookingCalendarController extends Controller
 
         if ($categoryId && $categoryId !== 'all') {
             $vehiclesQuery->where('vehicle_category_id', $categoryId);
+        }
+
+        if ($companyId && $companyId !== 'all') {
+            $vehiclesQuery->where('company_id', $companyId);
         }
 
         $vehicles = $vehiclesQuery->get();

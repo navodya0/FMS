@@ -271,6 +271,18 @@
                 @endforeach
             </select>
 
+            <select name="company_id" onchange="this.form.submit()">
+                <option value="all" {{ $selectedCompanyId == 'all' ? 'selected' : '' }}>
+                    All Companies
+                </option>
+
+                @foreach($companies as $company)
+                    <option value="{{ $company->id }}" {{ $selectedCompanyId == $company->id ? 'selected' : '' }}>
+                        {{ $company->name }}
+                    </option>
+                @endforeach
+            </select>
+
             <input type="month" name="month" value="{{ $selectedMonth }}">
 
             <button type="submit">Go</button>
@@ -285,7 +297,8 @@
         <a href="{{ route('vehicle.booking.calendar', [
             'month' => $previousMonth,
             'type_id' => $selectedTypeId,
-            'category_id' => $selectedCategoryId
+            'category_id' => $selectedCategoryId,
+            'company_id' => $selectedCompanyId
         ]) }}">
             Previous
         </a>
@@ -294,12 +307,14 @@
             {{ $month->format('F Y') }}
             - {{ $selectedVehicleType ?? 'All Types' }}
             - {{ $selectedVehicleCategory ?? 'All Categories' }}
+            - {{ $selectedCompanyName ?? 'All Companies' }}
         </div>
 
         <a href="{{ route('vehicle.booking.calendar', [
             'month' => $nextMonth,
             'type_id' => $selectedTypeId,
-            'category_id' => $selectedCategoryId
+            'category_id' => $selectedCategoryId,
+            'company_id' => $selectedCompanyId
         ]) }}">
             Next
         </a>
@@ -373,6 +388,7 @@
 
         $calendarExportRows->push([
             'vehicle' => $row['vehicle']->reg_no ?? ('Vehicle #' . $row['vehicle']->id),
+            'company_name' => $row['vehicle']->company->name ?? '-',
             'vehicle_type' => $row['vehicle']->vehicleType->type_name ?? '-',
             'vehicle_category' => $row['vehicle']->vehicleCategory->name ?? '-',
             'total_bookings' => count($row['ranges']),
@@ -412,12 +428,13 @@ document.addEventListener('DOMContentLoaded', function () {
             [`Vehicle Category: ${meta.vehicleCategory}`],
             [`Total Days In Month: ${meta.totalDays}`],
             [],
-            ['Vehicle No', 'Vehicle Type', 'Vehicle Category', 'Total Bookings', 'Used Days', 'Usage %', 'Utilization Status']
+            ['Vehicle No', 'Company Name', 'Vehicle Type', 'Vehicle Category', 'Total Bookings', 'Used Days', 'Usage %', 'Utilization Status']
         ];
 
         rows.forEach(r => {
             data.push([
                 r.vehicle,
+                r.company_name,
                 r.vehicle_type,
                 r.vehicle_category,
                 r.total_bookings,
@@ -431,6 +448,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         ws['!cols'] = [
             { wch: 18 },
+            { wch: 22 },
             { wch: 18 },
             { wch: 22 },
             { wch: 16 },
@@ -440,27 +458,27 @@ document.addEventListener('DOMContentLoaded', function () {
         ];
 
         ws['!merges'] = [
-            { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
-            { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
-            { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } },
-            { s: { r: 3, c: 0 }, e: { r: 3, c: 6 } },
-            { s: { r: 4, c: 0 }, e: { r: 4, c: 6 } }
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+            { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
+            { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
+            { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } },
+            { s: { r: 4, c: 0 }, e: { r: 4, c: 7 } }
         ];
 
-        styleRow(ws, 0, 0, 6, {
+        styleRow(ws, 0, 0, 7, {
             fill: solidFill('1F4E78'),
             font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
             alignment: { horizontal: 'center', vertical: 'center' }
         });
 
         for (let r = 1; r <= 4; r++) {
-            styleRow(ws, r, 0, 6, {
+            styleRow(ws, r, 0, 7, {
                 fill: solidFill('D9EAF7'),
                 font: { bold: true, color: { rgb: '1F1F1F' } }
             });
         }
 
-        styleRow(ws, 6, 0, 6, {
+        styleRow(ws, 6, 0, 7, {
             fill: solidFill('2F75B5'),
             font: { bold: true, color: { rgb: 'FFFFFF' } },
             alignment: { horizontal: 'center', vertical: 'center' },
@@ -468,14 +486,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         for (let r = 7; r < 7 + rows.length; r++) {
-            styleRow(ws, r, 0, 6, {
+            styleRow(ws, r, 0, 7, {
                 fill: solidFill('FFFFFF'),
                 font: { color: { rgb: '000000' } },
                 border: fullBorder('D9D9D9'),
                 alignment: { vertical: 'center' }
             });
 
-            const statusRef = XLSX.utils.encode_cell({ r, c: 6 });
+            const statusRef = XLSX.utils.encode_cell({ r, c: 7 });
             const status = ws[statusRef]?.v || '';
 
             if (status === 'Excellent') {
