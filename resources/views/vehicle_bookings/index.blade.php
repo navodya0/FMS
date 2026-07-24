@@ -245,6 +245,11 @@
         color: #fff;
     }
 
+    .tp-booking {
+        background-color: #c084fc !important;
+        color: #fff;
+    }
+
     .available-today-floating {
         position: absolute;
         right: 2rem;
