@@ -537,6 +537,32 @@ class RentalController extends Controller
         return redirect()->route('vehicle.bookings')->with('success', 'Departure date extended successfully.');
     }
 
+    public function saveActualDepartureDate(Request $request, $id)
+    {
+        $request->validate([
+            'actual_departure_date' => 'required|date',
+        ]);
+
+        $rental = Rental::findOrFail($id);
+        $rental->actual_departure_date = $request->actual_departure_date;
+        $rental->save();
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($rental)
+            ->withProperties([
+                'ip'                   => $request->ip(),
+                'actual_departure_date' => $rental->actual_departure_date,
+            ])
+            ->log('Saved actual departure date during mark-arrived');
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Actual departure date saved successfully.']);
+        }
+
+        return redirect()->route('vehicle.bookings')->with('success', 'Actual departure date saved.');
+    }
+
     public function availableVehicles(Rental $rental, Request $request)
     {
         $arrival   = $request->arrival;

@@ -193,6 +193,7 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/vehicle-bookings/{id}/assign-alternative', [RentalController::class, 'assignAlternativeVehicle'])->name('rentals.assignAlternativeVehicle');
     Route::patch('/vehicle-bookings/{rental}/extend-departure', [RentalController::class, 'extendDeparture'])->name('rentals.extendDeparture');
+    Route::patch('/vehicle-bookings/{id}/save-actual-departure', [RentalController::class, 'saveActualDepartureDate'])->name('rentals.saveActualDeparture');
 
     Route::get('/rentals/{rental}/available-vehicles', [RentalController::class, 'availableVehicles']);
     Route::post('/rentals/{rental}/change-vehicle', [RentalController::class, 'changeVehicle']);

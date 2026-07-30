@@ -343,8 +343,8 @@
                         data-arrival="{{ $booking->arrival_date }}"
                         data-booking-status="{{ $booking->status }}"
                         data-departure-date="{{ \Carbon\Carbon::parse($booking->departure_date)->format('Y-m-d H:i') }}"
-                        data-vehicle-reg="{{ $vehicle->reg_no }}"
-                        @if($canOpenModal && $vehicle->can_interact && $canManage)
+                        data-actual-departure-date="{{ $booking->actual_departure_date ? \Carbon\Carbon::parse($booking->actual_departure_date)->format('Y-m-d H:i') : '' }}"
+                        data-vehicle-reg="{{ $vehicle->reg_no }}"                        @if($canOpenModal && $vehicle->can_interact && $canManage)
                             data-action="open-booking-modal"
                         @endif
                         data-bs-toggle="tooltip"

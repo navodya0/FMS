@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let fpInstance = null;
     let fpAltInstance = null;
+    let fpArrivedInstance = null;
 
     // ----- HELPER FUNCTIONS -----
 
@@ -41,6 +42,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // Reset flatpickr instances
         if (fpInstance) { fpInstance.destroy(); fpInstance = null; }
         if (fpAltInstance) { fpAltInstance.destroy(); fpAltInstance = null; }
+        if (fpArrivedInstance) { fpArrivedInstance.destroy(); fpArrivedInstance = null; }
+        // Reset arrived date feedback
+        const feedback = document.getElementById('markArrivedDateFeedback');
+        if (feedback) feedback.classList.add('d-none');
     }
 
     function updateDropdownActions(status, arrivalDate) {
@@ -169,11 +174,61 @@ document.addEventListener('DOMContentLoaded', function () {
 
         switch(action){
             // ----- MARK ARRIVED -----
-            case 'mark-arrived':
+            case 'mark-arrived': {
+                // Show original departure date (read-only)
+                document.getElementById('markArrivedDepartureDate').textContent =
+                    cell.dataset.departureDate || '—';
+
+                // Init editable date picker — pre-fill with saved actual_departure_date if it exists, else leave empty
+                if (fpArrivedInstance) { fpArrivedInstance.destroy(); fpArrivedInstance = null; }
+                const existingActualDate = cell.dataset.actualDepartureDate || '';
+                fpArrivedInstance = flatpickr('#markArrivedCurrentDate', {
+                    enableTime: true,
+                    dateFormat: 'Y-m-d H:i',
+                    defaultDate: existingActualDate || null,
+                });
+
+                // Save button — persist chosen date as new departure date
+                const btnSave = document.getElementById('btnSaveArrivedDate');
+                const feedbackEl = document.getElementById('markArrivedDateFeedback');
+                // Remove previous listener by cloning the node
+                const btnSaveClone = btnSave.cloneNode(true);
+                btnSave.parentNode.replaceChild(btnSaveClone, btnSave);
+                btnSaveClone.addEventListener('click', function () {
+                    const chosenDate = document.getElementById('markArrivedCurrentDate').value;
+                    if (!chosenDate) { alert('Please select a date first.'); return; }
+                    btnSaveClone.disabled = true;
+                    btnSaveClone.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                    fetch(`/vehicle-bookings/${bookingId}/save-actual-departure`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ _method: 'PATCH', actual_departure_date: chosenDate })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error('Failed');
+                        return res.json();
+                    })
+                    .then(() => {
+                        feedbackEl.classList.remove('d-none');
+                        btnSaveClone.disabled = false;
+                        btnSaveClone.textContent = 'Save';
+                    })
+                    .catch(() => {
+                        alert('Failed to save actual departure date.');
+                        btnSaveClone.disabled = false;
+                        btnSaveClone.textContent = 'Save';
+                    });
+                });
+
                 markArrivedDiv.classList.remove('d-none');
                 document.getElementById('routineArrivalForm').action = `/vehicle-bookings/${bookingId}/arrived`;
                 document.getElementById('emergencyArrivalForm').action = `/vehicle-bookings/${bookingId}/arrived`;
                 break;
+            }
 
             // ----- CANCEL BOOKING -----
             case 'cancel-booking':
