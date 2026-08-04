@@ -252,6 +252,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/vehicle-bookings/{rental}/change-vehicle', [VehicleBookingController::class, 'changeVehicle'])->name('vehicle.change.update');
 
     Route::get('/vehicles/search', [VehicleBookingController::class, 'search'])->name('vehicles.search');
+    Route::get('/vehicle-bookings/daily-record', [VehicleBookingController::class, 'dailyRecord'])->name('vehicle-bookings.dailyRecord');
 
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
     Route::get('/reports/create', [ReportsController::class, 'create'])->name('reports.create');
