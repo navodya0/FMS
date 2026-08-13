@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Rental;
 use App\Models\Vehicle;
+use App\Models\VehicleFreeze;
 use App\Models\VehicleType;
 use App\Models\VehicleCategory;
 use Carbon\Carbon;
@@ -140,6 +141,7 @@ class VehicleBookingCalendarController extends Controller
                 'Vehicle Category',
                 'Total Bookings',
                 'Used Days',
+                'Freezed Days',
                 'Usage %',
                 'Utilization Status',
             ]);
@@ -154,6 +156,7 @@ class VehicleBookingCalendarController extends Controller
                     $row['vehicle']->vehicleCategory->name ?? '-',
                     count($row['ranges']),
                     $row['usedDays'],
+                    $row['freezedDays'],
                     $usage . '%',
                     $this->getUtilizationStatus($usage),
                 ]);
@@ -186,6 +189,15 @@ class VehicleBookingCalendarController extends Controller
         $freezedVehicleIds = DB::table('vehicle_freezes')
             ->pluck('vehicle_id')
             ->toArray();
+
+        // Load all freeze records that overlap the selected month
+        $vehicleFreezes = VehicleFreeze::where(function ($query) use ($startOfMonth, $endOfMonth) {
+            $query->where('start_date', '<=', $endOfMonth)
+                  ->where(function ($q) use ($startOfMonth) {
+                      $q->where('end_date', '>=', $startOfMonth)
+                        ->orWhereNull('end_date');
+                  });
+        })->get()->groupBy('vehicle_id');
 
         $vehiclesQuery = Vehicle::with(['vehicleType', 'vehicleCategory', 'company'])
             ->where('status', '!=', 'disabled')
@@ -222,7 +234,8 @@ class VehicleBookingCalendarController extends Controller
             $startOfMonth,
             $endOfMonth,
             $totalDays,
-            $freezedVehicleIds
+            $freezedVehicleIds,
+            $vehicleFreezes
         ) {
             $vehicleRentals = $rentals->get($vehicle->id, collect());
 
@@ -248,6 +261,30 @@ class VehicleBookingCalendarController extends Controller
 
             $usedDays = count($usedDates);
 
+            // Calculate freezed days within the month
+            $freezedDays = 0;
+            $freezeRecords = $vehicleFreezes->get($vehicle->id, collect());
+            $frozenDates = [];
+
+            foreach ($freezeRecords as $freeze) {
+                $freezeStart = Carbon::parse($freeze->start_date)->startOfDay();
+                $freezeEnd = $freeze->end_date
+                    ? Carbon::parse($freeze->end_date)->startOfDay()
+                    : $endOfMonth->copy();
+
+                // Clamp to month boundaries
+                $rangeStart = $freezeStart->greaterThan($startOfMonth) ? $freezeStart : $startOfMonth->copy();
+                $rangeEnd = $freezeEnd->lessThan($endOfMonth) ? $freezeEnd : $endOfMonth->copy();
+
+                if ($rangeStart->lte($rangeEnd)) {
+                    foreach (CarbonPeriod::create($rangeStart, $rangeEnd) as $date) {
+                        $frozenDates[$date->format('Y-m-d')] = true;
+                    }
+                }
+            }
+
+            $freezedDays = count($frozenDates);
+
             if (in_array($vehicle->id, $freezedVehicleIds)) {
                 $displayStatus = 'freezed';
             } elseif ($vehicle->status === 'active') {
@@ -260,6 +297,7 @@ class VehicleBookingCalendarController extends Controller
                 'vehicle' => $vehicle,
                 'ranges' => $ranges,
                 'usedDays' => $usedDays,
+                'freezedDays' => $freezedDays,
                 'usagePercent' => $totalDays > 0
                     ? round(($usedDays / $totalDays) * 100, 2)
                     : 0,

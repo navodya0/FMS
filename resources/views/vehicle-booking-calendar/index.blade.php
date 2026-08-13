@@ -393,6 +393,7 @@
             'vehicle_category' => $row['vehicle']->vehicleCategory->name ?? '-',
             'total_bookings' => count($row['ranges']),
             'used_days' => $row['usedDays'],
+            'freezed_days' => $row['freezedDays'],
             'usage' => $row['usagePercent'] . '%',
             'utilization_status' => $utilizationStatus,
         ]);
@@ -428,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
             [`Vehicle Category: ${meta.vehicleCategory}`],
             [`Total Days In Month: ${meta.totalDays}`],
             [],
-            ['Vehicle No', 'Company Name', 'Vehicle Type', 'Vehicle Category', 'Total Bookings', 'Used Days', 'Usage %', 'Utilization Status']
+            ['Vehicle No', 'Company Name', 'Vehicle Type', 'Vehicle Category', 'Total Bookings', 'Used Days', 'Freezed Days', 'Usage %', 'Utilization Status']
         ];
 
         rows.forEach(r => {
@@ -439,6 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 r.vehicle_category,
                 r.total_bookings,
                 r.used_days,
+                r.freezed_days,
                 r.usage,
                 r.utilization_status
             ]);
@@ -453,32 +455,33 @@ document.addEventListener('DOMContentLoaded', function () {
             { wch: 22 },
             { wch: 16 },
             { wch: 12 },
+            { wch: 14 },
             { wch: 12 },
             { wch: 22 }
         ];
 
         ws['!merges'] = [
-            { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
-            { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
-            { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
-            { s: { r: 3, c: 0 }, e: { r: 3, c: 7 } },
-            { s: { r: 4, c: 0 }, e: { r: 4, c: 7 } }
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
+            { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } },
+            { s: { r: 2, c: 0 }, e: { r: 2, c: 8 } },
+            { s: { r: 3, c: 0 }, e: { r: 3, c: 8 } },
+            { s: { r: 4, c: 0 }, e: { r: 4, c: 8 } }
         ];
 
-        styleRow(ws, 0, 0, 7, {
+        styleRow(ws, 0, 0, 8, {
             fill: solidFill('1F4E78'),
             font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
             alignment: { horizontal: 'center', vertical: 'center' }
         });
 
         for (let r = 1; r <= 4; r++) {
-            styleRow(ws, r, 0, 7, {
+            styleRow(ws, r, 0, 8, {
                 fill: solidFill('D9EAF7'),
                 font: { bold: true, color: { rgb: '1F1F1F' } }
             });
         }
 
-        styleRow(ws, 6, 0, 7, {
+        styleRow(ws, 6, 0, 8, {
             fill: solidFill('2F75B5'),
             font: { bold: true, color: { rgb: 'FFFFFF' } },
             alignment: { horizontal: 'center', vertical: 'center' },
@@ -486,14 +489,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         for (let r = 7; r < 7 + rows.length; r++) {
-            styleRow(ws, r, 0, 7, {
+            styleRow(ws, r, 0, 8, {
                 fill: solidFill('FFFFFF'),
                 font: { color: { rgb: '000000' } },
                 border: fullBorder('D9D9D9'),
                 alignment: { vertical: 'center' }
             });
 
-            const statusRef = XLSX.utils.encode_cell({ r, c: 7 });
+            const statusRef = XLSX.utils.encode_cell({ r, c: 8 });
             const status = ws[statusRef]?.v || '';
 
             if (status === 'Excellent') {
