@@ -285,4 +285,48 @@ class VehicleBookingController extends Controller
 
         return response()->json($vehicles);
     }
+
+    /**
+     * Fetch daily arrivals & departures for a given date (AJAX).
+     */
+    public function dailyRecord(Request $request)
+    {
+        $date = Carbon::parse($request->input('date', today()->toDateString()))->startOfDay();
+
+        $arrivals = Rental::with(['vehicle.vehicleType', 'company'])
+            ->whereDate('arrival_date', $date)
+            ->where('repair_type', '!=', 'emergency')
+            ->get()
+            ->map(fn ($r) => [
+                'booking_number' => $r->booking_number ?? '-',
+                'reg_no'         => $r->vehicle->reg_no ?? '-',
+                'customer'       => trim(($r->salutation ?? '') . ' ' . ($r->driver_name ?? '-')),
+                'type'           => $r->vehicle->vehicleType->type_name ?? '-',
+                'company'        => $r->company->name ?? '-',
+                'date'           => Carbon::parse($r->arrival_date)->format('d M Y'),
+            ]);
+
+        $departures = Rental::with(['vehicle.vehicleType', 'company'])
+            ->where(function ($query) use ($date) {
+                $query->whereDate('departure_date', $date)
+                      ->orWhereDate('emer_departure_date', $date);
+            })
+            ->get()
+            ->map(function ($r) {
+                $dep = $r->emer_departure_date ?? $r->departure_date;
+                return [
+                    'booking_number' => $r->booking_number ?? $r->emer_booking_number ?? '-',
+                    'reg_no'         => $r->vehicle->reg_no ?? '-',
+                    'customer'       => trim(($r->salutation ?? '') . ' ' . ($r->driver_name ?? '-')),
+                    'type'           => $r->vehicle->vehicleType->type_name ?? '-',
+                    'company'        => $r->company->name ?? '-',
+                    'date'           => Carbon::parse($dep)->format('d M Y'),
+                ];
+            });
+
+        return response()->json([
+            'arrivals'   => $arrivals->values(),
+            'departures' => $departures->values(),
+        ]);
+    }
 }

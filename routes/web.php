@@ -193,6 +193,7 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/vehicle-bookings/{id}/assign-alternative', [RentalController::class, 'assignAlternativeVehicle'])->name('rentals.assignAlternativeVehicle');
     Route::patch('/vehicle-bookings/{rental}/extend-departure', [RentalController::class, 'extendDeparture'])->name('rentals.extendDeparture');
+    Route::patch('/vehicle-bookings/{id}/save-actual-departure', [RentalController::class, 'saveActualDepartureDate'])->name('rentals.saveActualDeparture');
 
     Route::get('/rentals/{rental}/available-vehicles', [RentalController::class, 'availableVehicles']);
     Route::post('/rentals/{rental}/change-vehicle', [RentalController::class, 'changeVehicle']);
@@ -251,6 +252,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/vehicle-bookings/{rental}/change-vehicle', [VehicleBookingController::class, 'changeVehicle'])->name('vehicle.change.update');
 
     Route::get('/vehicles/search', [VehicleBookingController::class, 'search'])->name('vehicles.search');
+    Route::get('/vehicle-bookings/daily-record', [VehicleBookingController::class, 'dailyRecord'])->name('vehicle-bookings.dailyRecord');
 
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
     Route::get('/reports/create', [ReportsController::class, 'create'])->name('reports.create');

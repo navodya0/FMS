@@ -62,6 +62,21 @@
 
                 <!-- Mark Arrived Options -->
                 <div id="markArrivedOptions" class="d-none mt-3">
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-6">
+                            <label class="form-label text-muted small mb-1">Departure Date</label>
+                            <div id="markArrivedDepartureDate" class="fw-bold form-control bg-light" style="font-size:.92rem;"></div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small mb-1">New Departure Date</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="markArrivedCurrentDate" class="form-control" placeholder="Select date & time">
+                                <button type="button" id="btnSaveArrivedDate" class="btn btn-primary">Save</button>
+                            </div>
+                            <div id="markArrivedDateFeedback" class="text-success small mt-1 d-none">✔ Date saved.</div>
+                        </div>
+                    </div>
+
                     <h6 class="fw-bold">Select Arrival Type</h6>
                     <div class="d-flex gap-2">
                         <form id="routineArrivalForm" method="POST" class="d-inline">

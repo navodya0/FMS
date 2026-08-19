@@ -1,6 +1,7 @@
 <div class="container mb-2">
     <div class="d-flex gap-3 align-items-center">
         <div class="fw-bold"><span class="legend-box personal-booking"></span> Personal Booking</div>
+        <div class="fw-bold"><span class="legend-box tp-booking"></span> Terminal Prime Booking</div>
         <div class="fw-bold"><span class="legend-box past-booking"></span> Past Booking</div>
         <div class="fw-bold"><span class="legend-box current-booking"></span> On Tour</div>
         <div class="fw-bold"><span class="legend-box future-booking"></span> Future Bookings</div>
@@ -299,7 +300,11 @@
 
                             $creatorName = data_get($booking, 'creator.causer.name')
                                         ?? data_get($booking, 'creatorName.name')
-                                        ?? ($isSpecialBooking ? 'EES APP' : 'Deshan');
+                                        ?? ($isSpecialBooking ? 'EES APP' : 'sameera');
+
+                            if (str_starts_with($bookingNumber, 'TP')) {
+                                $creatorName = 'TERMINAL PRIME';
+                            }
                                                               
                             // $creatorName = $creatorName === 'N/A' ? 'System' : $creatorName;
 
@@ -329,16 +334,17 @@
 
                         @php
                             $isPersonal = str_contains($booking->booking_number, 'PERSONAL');
+                            $isTp = str_starts_with(strtoupper($booking->booking_number ?? ''), 'TP');
                         @endphp
 
-                        <td class="booking-cell {{ $cellClass }} {{ $isPersonal ? 'personal-booking' : '' }}"
+                        <td class="booking-cell {{ $cellClass }} {{ $isPersonal ? 'personal-booking' : '' }} {{ $isTp ? 'tp-booking' : '' }}"
                         colspan="{{ $colspan }}"
                         data-booking-id="{{ $booking->id }}"
                         data-arrival="{{ $booking->arrival_date }}"
                         data-booking-status="{{ $booking->status }}"
                         data-departure-date="{{ \Carbon\Carbon::parse($booking->departure_date)->format('Y-m-d H:i') }}"
-                        data-vehicle-reg="{{ $vehicle->reg_no }}"
-                        @if($canOpenModal && $vehicle->can_interact && $canManage)
+                        data-actual-departure-date="{{ $booking->actual_departure_date ? \Carbon\Carbon::parse($booking->actual_departure_date)->format('Y-m-d H:i') : '' }}"
+                        data-vehicle-reg="{{ $vehicle->reg_no }}"                        @if($canOpenModal && $vehicle->can_interact && $canManage)
                             data-action="open-booking-modal"
                         @endif
                         data-bs-toggle="tooltip"

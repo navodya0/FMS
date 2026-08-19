@@ -11,7 +11,6 @@
     </div>
 </div>
 
-
 <div class="card shadow-sm border-0">
     <div class="table-responsive card-body p-3">
         <ul class="nav nav-tabs mb-3" id="vehicleTabs" role="tablist">
@@ -44,7 +43,8 @@
 
                 @include('vehicles.table', [
                     'vehicles' => $vehicles,
-                    'showDisableButton' => true
+                    'showDisableButton' => true,
+                    'tableId' => 'vehiclesTable'
                 ])
 
             </div>
@@ -54,14 +54,15 @@
 
                 @include('vehicles.table', [
                     'vehicles' => $disabledVehicles,
-                    'showDisableButton' => false
+                    'showDisableButton' => false,
+                    'tableId' => 'disabledVehiclesTable'
                 ])
 
             </div>
 
             <div class="tab-pane fade" id="freeze" role="tabpanel">
                 <div class="table-responsive">
-                    <table class="table table-sm table-bordered align-middle">
+                    <table id="freezeVehiclesTable" class="table table-sm table-bordered align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Vehicle</th>
@@ -237,6 +238,7 @@
         });
 
         $(document).ready(function() {
+            // Active vehicles table (visible by default)
             $('#vehiclesTable').DataTable({
                 paging: true,
                 searching: true,
@@ -247,6 +249,44 @@
                 columnDefs: [
                     { orderable: false, targets: -1 } 
                 ]
+            });
+
+            // Lazy-init DataTables on hidden tabs (they need to be visible to render correctly)
+            var disabledInitialized = false;
+            var freezeInitialized = false;
+
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var target = $(e.target).attr('data-bs-target');
+
+                if (target === '#disabled' && !disabledInitialized) {
+                    $('#disabledVehiclesTable').DataTable({
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        info: true,
+                        lengthChange: true,
+                        pageLength: 25,
+                        columnDefs: [
+                            { orderable: false, targets: -1 }
+                        ]
+                    });
+                    disabledInitialized = true;
+                }
+
+                if (target === '#freeze' && !freezeInitialized) {
+                    $('#freezeVehiclesTable').DataTable({
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        info: true,
+                        lengthChange: true,
+                        pageLength: 25,
+                        columnDefs: [
+                            { orderable: false, targets: -1 }
+                        ]
+                    });
+                    freezeInitialized = true;
+                }
             });
         });
     </script>

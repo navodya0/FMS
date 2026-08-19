@@ -153,6 +153,10 @@ class RentalController extends Controller
             ])
             ->log('Vehicle marked as arrived (routine)');
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Vehicle marked as arrived.']);
+        }
+
         return redirect()
             ->route('vehicle.bookings')
             ->with('success', 'Vehicle marked as arrived.');
@@ -324,6 +328,9 @@ class RentalController extends Controller
         $rental = Rental::findOrFail($id);
 
         if ($rental->status !== 'booked') {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Only booked rentals can be cancelled.'], 422);
+            }
             return redirect()->back()->with(
                 'error',
                 'Only booked rentals can be cancelled.'
@@ -348,6 +355,10 @@ class RentalController extends Controller
                 'status'    => 'booked',
             ])
             ->log('Cancelled and deleted booked rental');
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Booked rental cancelled successfully.']);
+        }
 
         return redirect()->back()->with(
             'success',
@@ -375,6 +386,9 @@ class RentalController extends Controller
         $rental = Rental::findOrFail($id);
 
         if ($rental->status !== 'rented') {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Only rented bookings can be cancelled.'], 422);
+            }
             return redirect()->back()->with(
                 'error',
                 'Only rented bookings can be cancelled.'
@@ -399,6 +413,10 @@ class RentalController extends Controller
                 'status'    => 'booked',
             ])
             ->log('Cancelled and deleted booked rental');
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Booked rental cancelled successfully.']);
+        }
 
         return redirect()->back()->with(
             'success',
@@ -478,6 +496,10 @@ class RentalController extends Controller
             ])
             ->log('Assigned an alternative vehicle to rental');
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Alternative vehicle assigned successfully.']);
+        }
+
         return redirect()
             ->route('vehicle.bookings')
             ->with('success', 'Alternative vehicle assigned successfully.');
@@ -508,7 +530,37 @@ class RentalController extends Controller
             ])
             ->log('Extended rental departure date');
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Departure date extended successfully.']);
+        }
+
         return redirect()->route('vehicle.bookings')->with('success', 'Departure date extended successfully.');
+    }
+
+    public function saveActualDepartureDate(Request $request, $id)
+    {
+        $request->validate([
+            'actual_departure_date' => 'required|date',
+        ]);
+
+        $rental = Rental::findOrFail($id);
+        $rental->actual_departure_date = $request->actual_departure_date;
+        $rental->save();
+
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn($rental)
+            ->withProperties([
+                'ip'                   => $request->ip(),
+                'actual_departure_date' => $rental->actual_departure_date,
+            ])
+            ->log('Saved actual departure date during mark-arrived');
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Actual departure date saved successfully.']);
+        }
+
+        return redirect()->route('vehicle.bookings')->with('success', 'Actual departure date saved.');
     }
 
     public function availableVehicles(Rental $rental, Request $request)
