@@ -32,14 +32,16 @@ class Rental extends Model
         'alternative_start_date',
         'change_reason',
         'is_old_vehicle',
-        'created_by'
+        'created_by',
+        'actual_departure_date',
     ];
 
     protected $casts = [
         'emer_arrival_date' => 'datetime',
         'emer_departure_date' => 'datetime',
-        'arrival_date'   => 'datetime',
-        'departure_date' => 'datetime',
+        'arrival_date'          => 'datetime',
+        'departure_date'        => 'datetime',
+        'actual_departure_date' => 'datetime',
     ];
 
     public function vehicle()

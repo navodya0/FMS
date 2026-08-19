@@ -245,6 +245,11 @@
         color: #fff;
     }
 
+    .tp-booking {
+        background-color: #c084fc !important;
+        color: #fff;
+    }
+
     .available-today-floating {
         position: absolute;
         right: 2rem;
@@ -942,6 +947,13 @@
             let selectedCategoryId = null;
             let selectedCompany = '';
 
+            // Global helper so booking-actions-script can refresh just the grid
+            window.refreshBookingGrid = function() {
+                if (selectedTypeId) {
+                    window.renderBookingGrid(selectedTypeId, selectedCategoryId);
+                }
+            };
+
 
             const monthSelect = document.getElementById('month-select');
             const yearSelect = document.getElementById('year-select');
@@ -1021,7 +1033,7 @@
             //     }
             // });
 
-            function renderBookingGrid(typeId, categoryId = null) {
+            window.renderBookingGrid = function(typeId, categoryId = null) {
                 selectedTypeId = typeId;
                 selectedCategoryId = categoryId;
 
